@@ -1,0 +1,128 @@
+{
+  "_comment": "AutoLabSim reset config template. Copy this file and replace names/poses with your own scene objects.",
+  "actuators": {
+    "shoulder_pan": 0.0,
+    "shoulder_lift": -1.7,
+    "elbow": 1.82,
+    "wrist_1": -1.7,
+    "wrist_2": -1.57,
+    "wrist_3": 1.57,
+    "ur5e1_shoulder_pan": 3.08,
+    "ur5e1_shoulder_lift": -1.7,
+    "ur5e1_elbow": 1.82,
+    "ur5e1_wrist_1": -1.7,
+    "ur5e1_wrist_2": -1.57,
+    "ur5e1_wrist_3": 1.51,
+    "2f85:fingers_actuator": 0.0,
+    "2f85_1fingers_actuator": 0.0
+  },
+  "free_joints": {
+    "object_joint_example_1": {
+      "pos": [
+        0.0,
+        0.0,
+        -10.0
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "object_joint_example_2": {
+      "pos": [
+        0.0,
+        0.0,
+        -10.5
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "companion_joint_example_1": {
+      "pos": [
+        0.0,
+        0.0,
+        -10.0
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "random_single_free_joint": {
+    "active_joint": "object_joint_example_1",
+    "joints": [
+      "object_joint_example_1",
+      "object_joint_example_2"
+    ],
+    "companion_joints": {
+      "object_joint_example_1": [
+        {
+          "joint": "companion_joint_example_1",
+          "pos_offset": [
+            0.0,
+            0.0,
+            0.12
+          ],
+          "quat": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "inactive_pose": {
+      "pos": [
+        0.0,
+        0.0,
+        -10.0
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "slots": [
+      {
+        "name": "slot_0",
+        "pos": [
+          -0.4,
+          -3.03,
+          0.4
+        ],
+        "quat": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "slot_1",
+        "pos": [
+          -0.35,
+          -3.03,
+          0.4
+        ],
+        "quat": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    ]
+  }
+}

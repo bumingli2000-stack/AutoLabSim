@@ -1,0 +1,53 @@
+{
+  "actuators": {
+    "joint0_ctrl": 0.0,
+    "shoulder_pan": 0.0,
+    "shoulder_lift": -1.7,
+    "elbow": 1.82,
+    "wrist_1": -1.7,
+    "wrist_2": -1.57,
+    "wrist_3": 1.57,
+    "ur5e1_shoulder_pan": 3.08,
+    "ur5e1_shoulder_lift": -1.7,
+    "ur5e1_elbow": 1.82,
+    "ur5e1_wrist_1": -1.7,
+    "ur5e1_wrist_2": -1.57,
+    "ur5e1_wrist_3": 1.51,
+    "2f85:fingers_actuator": 0.0,
+    "2f85_1fingers_actuator": 0.0
+  },
+  "free_joints": {
+    "centrifuge_50ml_screw_joint_1": {
+      "pos": [-0.4, -3.03, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_50ml_screw_joint_2": {
+      "pos": [-0.35, -3.03, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_50ml_screw_joint_3": {
+      "pos": [-0.3, -3.03, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_50ml_screw_joint_4": {
+      "pos": [-0.25, -3.03, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_15ml_screw_joint_1": {
+      "pos": [-0.43375, -3.25, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_15ml_screw_joint_2": {
+      "pos": [-0.38375, -3.25, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_15ml_screw_joint_3": {
+      "pos": [-0.33375, -3.25, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_15ml_screw_joint_4": {
+      "pos": [-0.48375, -3.25, 0.44],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    }
+  }
+}
