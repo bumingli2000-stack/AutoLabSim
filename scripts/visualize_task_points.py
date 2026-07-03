@@ -48,6 +48,13 @@ TASK_DEFAULTS = {
         "tool_roll": float(np.pi),
         "grasp_outward_offset": 0.02,
     },
+    "bimanual_unscrew_cap": {
+        "arm": "second",
+        "approach_axis": None,
+        "closing_axis": None,
+        "tool_roll": float(np.pi),
+        "grasp_outward_offset": 0.0,
+    },
 }
 
 
@@ -403,7 +410,142 @@ def plan_tube_then_cap_grasp_points(
     }
 
 
+def plan_bimanual_unscrew_cap_points(
+    model: Any,
+    data: Any,
+    mujoco: Any,
+    args: argparse.Namespace,
+    active_joint: str,
+    random_info: dict[str, Any] | None,
+) -> dict[str, Any]:
+    tube_arm = args.tube_arm or "second"
+    cap_arm = args.cap_arm or "first"
+
+    cap_args = namespace_with(
+        args,
+        task="cap_grasp",
+        arm=cap_arm,
+        approach_axis=args.cap_approach_axis,
+        closing_axis=args.cap_closing_axis,
+        tool_roll=args.cap_tool_roll,
+        pregrasp_distance=args.cap_pregrasp_distance,
+        grasp_outward_offset=args.cap_grasp_outward_offset if args.cap_grasp_outward_offset is not None else 0.0,
+    )
+    tube_args = namespace_with(
+        args,
+        task="tube_grasp",
+        arm=tube_arm,
+        approach_axis=args.tube_approach_axis,
+        closing_axis=args.tube_closing_axis,
+        tool_roll=args.tube_tool_roll,
+        grasp_outward_offset=args.tube_grasp_outward_offset if args.tube_grasp_outward_offset is not None else 0.0,
+    )
+
+    cap_body = args.cap_body or cap_body_from_tube_joint(active_joint)
+    cap_start_pos = body_pos(model, data, mujoco, cap_body)
+    cap_approach_axis, cap_closing_axis, cap_tool_roll = resolve_axes_for_task(
+        cap_args,
+        "cap_grasp",
+        cap_arm,
+        cap_args.approach_axis,
+        cap_args.closing_axis,
+        cap_args.tool_roll,
+    )
+    cap_plan = plan_cap_grasp_at_pos(
+        mujoco,
+        cap_args,
+        cap_arm,
+        active_joint,
+        random_info,
+        cap_body,
+        cap_start_pos,
+        cap_approach_axis,
+        cap_closing_axis,
+        cap_tool_roll,
+    )
+
+    # screw_cap.py 里是瓶盖臂先抓盖并整体抬起管子，再由管身臂横向夹管。
+    tube_start_pos = free_joint_pos(model, data, mujoco, active_joint)
+    tube_lifted_pos = tube_start_pos + np.asarray(args.post_offset, dtype=np.float64)
+    tube_plan = plan_tube_grasp_points(model, data, mujoco, tube_args, active_joint, random_info)
+    lifted_tube_plan = plan_tube_grasp_points_at_pos(
+        model,
+        data,
+        mujoco,
+        tube_args,
+        active_joint,
+        random_info,
+        tube_lifted_pos,
+    )
+
+    cap_prefixed = prefix_plan(cap_plan, "cap")
+    tube_prefixed = prefix_plan(lifted_tube_plan, "tube_after_cap_lift")
+    return {
+        "poses": {**cap_prefixed["poses"], **tube_prefixed["poses"]},
+        "markers": [*cap_prefixed["markers"], *tube_prefixed["markers"]],
+        "connectors": [*cap_prefixed["connectors"], *tube_prefixed["connectors"]],
+        "metadata": {
+            "task": args.task,
+            "active_joint": active_joint,
+            "slot_index": random_info.get("slot_index") if random_info else None,
+            "slot_name": random_info.get("slot_name") if random_info else None,
+            "tube_arm": tube_arm,
+            "cap_arm": cap_arm,
+            "cap_body": cap_body,
+            "cap_start_pos": cap_start_pos.tolist(),
+            "tube_start_pos": tube_start_pos.tolist(),
+            "tube_lifted_pos": tube_lifted_pos.tolist(),
+            "cap_lift_delta": np.asarray(args.post_offset, dtype=np.float64).tolist(),
+            "cap": cap_plan["metadata"],
+            "tube_after_cap_lift": lifted_tube_plan["metadata"],
+            "tube_at_start_reference": tube_plan["metadata"],
+        },
+    }
+
+
+def plan_tube_grasp_points_at_pos(
+    model: Any,
+    data: Any,
+    mujoco: Any,
+    args: argparse.Namespace,
+    active_joint: str,
+    random_info: dict[str, Any] | None,
+    tube_pos: np.ndarray,
+) -> dict[str, Any]:
+    arm = resolve_arm(args)
+    approach_axis, closing_axis, tool_roll = resolve_axes(args, arm)
+    lift_offset = args.lift_offset
+    if lift_offset is None:
+        lift_offset = np.asarray([0.0, 0.0, args.lift_distance], dtype=np.float64)
+    lift_offset = np.asarray(lift_offset, dtype=np.float64)
+
+    grasp_pos = (
+        tube_pos
+        + np.asarray([0.0, 0.0, args.grasp_height], dtype=np.float64)
+        + approach_axis * float(args.pinch_forward_offset)
+        - approach_axis * resolve_grasp_outward_offset(args)
+    )
+    pregrasp_pos = grasp_pos - approach_axis * float(args.pregrasp_distance)
+    post_pos = grasp_pos + lift_offset
+    plan = marker_plan(mujoco, approach_axis, closing_axis, tool_roll, pregrasp_pos, grasp_pos, post_pos)
+    plan["metadata"] = {
+        "task": args.task,
+        "arm": arm,
+        "active_joint": active_joint,
+        "slot_index": random_info.get("slot_index") if random_info else None,
+        "slot_name": random_info.get("slot_name") if random_info else None,
+        "tube_origin_pos": tube_pos.tolist(),
+        "grasp_height": args.grasp_height,
+        "pinch_forward_offset": args.pinch_forward_offset,
+        "grasp_outward_offset": resolve_grasp_outward_offset(args),
+        "lift_offset": lift_offset.tolist(),
+        "tool_roll": tool_roll,
+    }
+    return plan
+
+
 PLANNERS: dict[str, Planner] = {
+    "bimanual_unscrew_cap": plan_bimanual_unscrew_cap_points,
     "tube_grasp": plan_tube_grasp_points,
     "cap_grasp": plan_cap_grasp_points,
     "tube_then_cap_grasp": plan_tube_then_cap_grasp_points,
@@ -440,13 +582,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pregrasp-distance", type=float, default=0.10, help="Distance before grasp along -approach axis.")
     parser.add_argument("--grasp-outward-offset", type=float, default=None, help="Move grasp point outward, opposite the approach axis. Defaults depend on --task.")
 
-    parser.add_argument("--grasp-height", type=float, default=0.09, help="[tube_grasp] Height above tube free-joint origin.")
-    parser.add_argument("--pinch-forward-offset", type=float, default=0.02, help="[tube_grasp] Move pinch target along approach axis.")
+    parser.add_argument("--grasp-height", type=float, default=0.08, help="[tube_grasp] Height above tube free-joint origin.")
+    parser.add_argument("--pinch-forward-offset", type=float, default=0.0, help="[tube_grasp] Move pinch target along approach axis.")
     parser.add_argument("--lift-distance", type=float, default=0.10, help="[tube_grasp] Vertical lift distance if --lift-offset is none.")
     parser.add_argument("--lift-offset", type=lambda value: parse_optional_vec3(value, "lift_offset"), default=[0.25, 0.0, 0.12], help="[tube_grasp] World XYZ offset from grasp to post point.")
 
     parser.add_argument("--cap-body", default=None, help="[cap_grasp] Cap body name. Defaults to the cap attached to active tube.")
-    parser.add_argument("--cap-offset", type=lambda value: parse_optional_vec3(value, "cap_offset"), default=[0.0, 0.0, 0.02], help="[cap_grasp] World XYZ offset from cap body center to grasp point.")
+    parser.add_argument("--cap-offset", type=lambda value: parse_optional_vec3(value, "cap_offset"), default=[0.0, 0.0, 0.0], help="[cap_grasp] World XYZ offset from cap body center to grasp point.")
+    parser.add_argument("--cap-pregrasp-distance", type=float, default=0.10, help="[bimanual_unscrew_cap] Distance before cap grasp along the approach axis.")
     parser.add_argument("--post-distance", type=float, default=0.08, help="[cap_grasp] Vertical post point distance if --post-offset is none.")
     parser.add_argument("--post-offset", type=lambda value: parse_optional_vec3(value, "post_offset"), default=[0.0, 0.0, 0.08], help="[cap_grasp] World XYZ offset from grasp to post point.")
 
@@ -456,7 +599,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tube-closing-axis", default=None, help="[tube_then_cap_grasp] Closing axis for tube grasp stage.")
     parser.add_argument("--cap-approach-axis", default=None, help="[tube_then_cap_grasp] Approach axis for cap grasp stage.")
     parser.add_argument("--cap-closing-axis", default=None, help="[tube_then_cap_grasp] Closing axis for cap grasp stage.")
-    parser.add_argument("--tube-tool-roll", type=float, default=0, help="[tube_then_cap_grasp] Tool roll for tube grasp stage.")
+    parser.add_argument("--tube-tool-roll", type=float, default=float(np.pi), help="[tube_then_cap_grasp] Tool roll for tube grasp stage.")
     parser.add_argument("--cap-tool-roll", type=float, default=None, help="[tube_then_cap_grasp] Tool roll for cap grasp stage.")
     parser.add_argument("--tube-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for tube grasp stage.")
     parser.add_argument("--cap-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for cap grasp stage.")
@@ -550,7 +693,7 @@ def main() -> None:
             for _ in range(max(1, args.steps_per_sync)):
                 mujoco.mj_step(model, data)
             if held_tube_state is not None:
-                restore_free_joint_state(data, model, mujoco, active_joint, held_tube_state)
+                restore_free_joint_state(model, data, mujoco, active_joint, held_tube_state)
 
             with viewer.lock():
                 viewer.user_scn.ngeom = 0

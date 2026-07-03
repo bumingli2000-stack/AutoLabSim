@@ -31,12 +31,12 @@
         <joint range="-3.1415 3.1415" />
       </default>
       <default class="position">
-        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-150 150" />
+        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-260 260" />
         <default class="position_limited">
           <position ctrlrange="-3.1415 3.1415" />
         </default>
         <default class="position_small">
-          <position kp="500" kv="25" forcerange="-28 28" />
+          <position kp="800" kv="55" forcerange="-70 70" />
         </default>
       </default>
     </default>
@@ -57,12 +57,12 @@
         <joint range="-3.1415 3.1415" />
       </default>
       <default class="position1">
-        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-150 150" />
+        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-260 260" />
         <default class="position_limited1">
           <position ctrlrange="-3.1415 3.1415" />
         </default>
         <default class="position_small1">
-          <position kp="500" kv="25" forcerange="-28 28" />
+          <position kp="800" kv="55" forcerange="-70 70" />
         </default>
       </default>
     </default>
@@ -154,14 +154,14 @@
       <inertial mass="4" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
       <geom mesh="base_0" material="black" class="visual" contype="0" conaffinity="0" />
       <geom mesh="base_1" material="jointgray" class="visual" contype="0" conaffinity="0" />
-      <body name="shoulder_link" pos="0 0 0.163">
+      <body name="shoulder_link" pos="0 0 0.163" gravcomp="1">
         <inertial mass="3.7" pos="0 0 0" diaginertia="0.0102675 0.0102675 0.00666" />
         <joint name="shoulder_pan" axis="0 0 1" />
         <geom mesh="shoulder_0" material="urblue" class="visual" contype="0" conaffinity="0" />
         <geom mesh="shoulder_1" material="black" class="visual" contype="0" conaffinity="0" />
         <geom mesh="shoulder_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
         <geom class="collision" size="0.06 0.06" pos="0 0 -0.04" />
-        <body name="upper_arm_link" pos="0 0.138 0" quat="1 0 1 0">
+        <body name="upper_arm_link" pos="0 0.138 0" quat="1 0 1 0" gravcomp="1">
           <inertial mass="8.393" pos="0 0 0.2125" diaginertia="0.133886 0.133886 0.0151074" />
           <joint name="shoulder_lift" />
           <geom mesh="upperarm_0" material="linkgray" class="visual" contype="0" conaffinity="0" />
@@ -170,7 +170,7 @@
           <geom mesh="upperarm_3" material="urblue" class="visual" contype="0" conaffinity="0" />
           <geom class="collision" pos="0 -0.04 0" quat="1 1 0 0" size="0.06 0.06" />
           <geom class="collision" size="0.05 0.2" pos="0 0 0.2" />
-          <body name="forearm_link" pos="0 -0.131 0.425">
+          <body name="forearm_link" pos="0 -0.131 0.425" gravcomp="1">
             <inertial mass="2.275" pos="0 0 0.196" diaginertia="0.0311796 0.0311796 0.004095" />
             <joint name="elbow" class="joint_limited" />
             <geom mesh="forearm_0" material="urblue" class="visual" contype="0" conaffinity="0" />
@@ -179,14 +179,14 @@
             <geom mesh="forearm_3" material="jointgray" class="visual" contype="0" conaffinity="0" />
             <geom class="collision" pos="0 0.08 0" quat="1 1 0 0" size="0.055 0.06" />
             <geom class="collision" size="0.038 0.19" pos="0 0 0.2" />
-            <body name="wrist_1_link" pos="0 0 0.392" quat="1 0 1 0">
+            <body name="wrist_1_link" pos="0 0 0.392" quat="1 0 1 0" gravcomp="1">
               <inertial mass="1.219" pos="0 0.127 0" diaginertia="0.0025599 0.0025599 0.0021942" />
               <joint name="wrist_1" />
               <geom mesh="wrist1_0" material="black" class="visual" contype="0" conaffinity="0" />
               <geom mesh="wrist1_1" material="urblue" class="visual" contype="0" conaffinity="0" />
               <geom mesh="wrist1_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
               <geom class="collision" pos="0 0.05 0" quat="1 1 0 0" size="0.04 0.07" />
-              <body name="wrist_2_link" pos="0 0.127 0">
+              <body name="wrist_2_link" pos="0 0.127 0" gravcomp="1">
                 <inertial mass="1.219" pos="0 0 0.1" diaginertia="0.0025599 0.0025599 0.0021942" />
                 <joint name="wrist_2" axis="0 0 1" />
                 <geom mesh="wrist2_0" material="black" class="visual" contype="0" conaffinity="0" />
@@ -194,16 +194,16 @@
                 <geom mesh="wrist2_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
                 <geom class="collision" size="0.04 0.06" pos="0 0 0.04" />
                 <geom class="collision" pos="0 0.02 0.1" quat="1 1 0 0" size="0.04 0.04" />
-                <body name="wrist_3_link" pos="0 0 0.1">
+                <body name="wrist_3_link" pos="0 0 0.1" gravcomp="1">
                   <inertial mass="0.1879" pos="0 0.0771683 0" quat="1 0 0 1" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
                   <joint name="wrist_3" />
                   <geom material="linkgray" mesh="wrist3" class="visual" contype="0" conaffinity="0" />
                   <geom class="eef_collision" pos="0 0.08 0" quat="1 1 0 0" size="0.04 0.02" />
                   <site name="attachment_site" size="0.01" pos="0 0.1 0" quat="-1 1 1 1" rgba="1 0 0 1" group="1" />
-                  <frame pos="0 0.1 0" quat="-1 1 1 1">
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
                     <camera name="wrist_cam" pos="0 0.0924748 0.04" quat="0 0 0.988 0.156" mode="fixed" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
                   </frame>
-                  <frame pos="0 0.1 0" quat="-1 1 1 1">
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
                     <attach model="2f85" prefix="2f85:" />
                   </frame>
                 </body>
@@ -217,14 +217,14 @@
       <inertial mass="4" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
       <geom mesh="base_0" material="black" class="visual" contype="0" conaffinity="0" />
       <geom mesh="base_1" material="jointgray" class="visual" contype="0" conaffinity="0" />
-      <body name="shoulder_link1" pos="0 0 0.163">
+      <body name="shoulder_link1" pos="0 0 0.163" gravcomp="1">
         <inertial mass="3.7" pos="0 0 0" diaginertia="0.0102675 0.0102675 0.00666" />
         <joint name="ur5e1_shoulder_pan" axis="0 0 1" />
         <geom mesh="shoulder_0" material="urblue" class="visual" contype="0" conaffinity="0" />
         <geom mesh="shoulder_1" material="black" class="visual" contype="0" conaffinity="0" />
         <geom mesh="shoulder_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
         <geom class="collision" size="0.06 0.06" pos="0 0 -0.04" />
-        <body name="upper_arm_link1" pos="0 0.138 0" quat="1 0 1 0">
+        <body name="upper_arm_link1" pos="0 0.138 0" quat="1 0 1 0" gravcomp="1">
           <inertial mass="8.393" pos="0 0 0.2125" diaginertia="0.133886 0.133886 0.0151074" />
           <joint name="ur5e1_shoulder_lift" />
           <geom mesh="upperarm_0" material="linkgray" class="visual" contype="0" conaffinity="0" />
@@ -233,7 +233,7 @@
           <geom mesh="upperarm_3" material="urblue" class="visual" contype="0" conaffinity="0" />
           <geom class="collision" pos="0 -0.04 0" quat="1 1 0 0" size="0.06 0.06" />
           <geom class="collision" size="0.05 0.2" pos="0 0 0.2" />
-          <body name="forearm_link1" pos="0 -0.131 0.425">
+          <body name="forearm_link1" pos="0 -0.131 0.425" gravcomp="1">
             <inertial mass="2.275" pos="0 0 0.196" diaginertia="0.0311796 0.0311796 0.004095" />
             <joint name="ur5e1_elbow" class="joint_limited" />
             <geom mesh="forearm_0" material="urblue" class="visual" contype="0" conaffinity="0" />
@@ -242,14 +242,14 @@
             <geom mesh="forearm_3" material="jointgray" class="visual" contype="0" conaffinity="0" />
             <geom class="collision" pos="0 0.08 0" quat="1 1 0 0" size="0.055 0.06" />
             <geom class="collision" size="0.038 0.19" pos="0 0 0.2" />
-            <body name="wrist_1_link1" pos="0 0 0.392" quat="1 0 1 0">
+            <body name="wrist_1_link1" pos="0 0 0.392" quat="1 0 1 0" gravcomp="1">
               <inertial mass="1.219" pos="0 0.127 0" diaginertia="0.0025599 0.0025599 0.0021942" />
               <joint name="ur5e1_wrist_1" />
               <geom mesh="wrist1_0" material="black" class="visual" contype="0" conaffinity="0" />
               <geom mesh="wrist1_1" material="urblue" class="visual" contype="0" conaffinity="0" />
               <geom mesh="wrist1_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
               <geom class="collision" pos="0 0.05 0" quat="1 1 0 0" size="0.04 0.07" />
-              <body name="wrist_2_link1" pos="0 0.127 0">
+              <body name="wrist_2_link1" pos="0 0.127 0" gravcomp="1">
                 <inertial mass="1.219" pos="0 0 0.1" diaginertia="0.0025599 0.0025599 0.0021942" />
                 <joint name="ur5e1_wrist_2" axis="0 0 1" />
                 <geom mesh="wrist2_0" material="black" class="visual" contype="0" conaffinity="0" />
@@ -257,16 +257,16 @@
                 <geom mesh="wrist2_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
                 <geom class="collision" size="0.04 0.06" pos="0 0 0.04" />
                 <geom class="collision" pos="0 0.02 0.1" quat="1 1 0 0" size="0.04 0.04" />
-                <body name="wrist_3_link1" pos="0 0 0.1">
+                <body name="wrist_3_link1" pos="0 0 0.1" gravcomp="1">
                   <inertial mass="0.1879" pos="0 0.0771683 0" quat="1 0 0 1" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
                   <joint name="ur5e1_wrist_3" />
                   <geom material="linkgray" mesh="wrist3" class="visual" contype="0" conaffinity="0" />
                   <geom class="eef_collision" pos="0 0.08 0" quat="1 1 0 0" size="0.04 0.02" />
                   <site name="attachment_site1" size="0.01" pos="0 0.1 0" quat="-1 1 1 1" rgba="1 0 0 1" group="1" />
-                  <frame pos="0 0.1 0" quat="-1 1 1 1">
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
                     <camera name="wrist_cam1" pos="0 0.0924748 0.04" quat="0 0 0.988 0.156" mode="fixed" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
                   </frame>
-                  <frame pos="0 0.1 0" quat="-1 1 1 1">
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
                     <attach model="2f85" prefix="2f85_1" />
                   </frame>
                 </body>

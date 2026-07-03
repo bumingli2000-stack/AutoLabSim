@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import MISSING, dataclass, fields
 from pathlib import Path
 from typing import Any, Callable
 
@@ -44,6 +44,30 @@ def _make_env(request: TaskRequest) -> EnvConfig:
     )
 
 
+def _config_default(config_cls: type, field_name: str) -> Any:
+    for field in fields(config_cls):
+        if field.name != field_name:
+            continue
+        if field.default is not MISSING:
+            return field.default
+        if field.default_factory is not MISSING:  # type: ignore[attr-defined]
+            return field.default_factory()  # type: ignore[misc]
+        raise KeyError(f"Field has no default: {config_cls.__name__}.{field_name}")
+    raise KeyError(f"Unknown config field: {config_cls.__name__}.{field_name}")
+
+
+def _param(params: dict[str, Any], key: str, config_cls: type, field_name: str | None = None) -> Any:
+    value = params.get(key)
+    if value is not None:
+        return value
+    return _config_default(config_cls, field_name or key)
+
+
+def _vec_param(params: dict[str, Any], key: str, config_cls: type, field_name: str | None = None) -> tuple[float, float, float]:
+    value = _param(params, key, config_cls, field_name)
+    return tuple(np.asarray(value, dtype=np.float64).tolist())
+
+
 def _create_tube_grasp_task(request: TaskRequest) -> TubeGraspTask:
     params = request.params
     return TubeGraspTask(
@@ -54,25 +78,25 @@ def _create_tube_grasp_task(request: TaskRequest) -> TubeGraspTask:
             seed=request.seed,
             cameras=request.cameras,
             with_images=request.with_images,
-            arm=params["arm"],
-            open_gripper=params["open_gripper"],
-            close_gripper=params["close_gripper"],
-            settle_steps=params["settle_steps"],
-            steps_per_segment=params["steps_per_segment"],
-            grasp_hold_steps=params["grasp_hold_steps"],
-            close_steps=params["close_steps"],
-            hold_steps=params["hold_steps"],
-            grasp_height=params["grasp_height"],
-            pregrasp_distance=params["pregrasp_distance"],
-            lift_offset=tuple(np.asarray(params["lift_offset"], dtype=np.float64).tolist()),
-            pinch_forward_offset=params["pinch_forward_offset"],
-            grasp_outward_offset=params["grasp_outward_offset"],
-            tool_roll=params["tool_roll"],
-            hold_active_tube_until_grasp=params["hold_active_tube_until_grasp"],
-            ik_max_iters=params["ik_max_iters"],
-            ik_pos_tol=params["ik_pos_tol"],
-            ik_rot_tol=params["ik_rot_tol"],
-            ik_damping=params["ik_damping"],
+            arm=_param(params, "arm", TubeGraspTaskConfig),
+            open_gripper=_param(params, "open_gripper", TubeGraspTaskConfig),
+            close_gripper=_param(params, "close_gripper", TubeGraspTaskConfig),
+            settle_steps=_param(params, "settle_steps", TubeGraspTaskConfig),
+            steps_per_segment=_param(params, "steps_per_segment", TubeGraspTaskConfig),
+            grasp_hold_steps=_param(params, "grasp_hold_steps", TubeGraspTaskConfig),
+            close_steps=_param(params, "close_steps", TubeGraspTaskConfig),
+            hold_steps=_param(params, "hold_steps", TubeGraspTaskConfig),
+            grasp_height=_param(params, "grasp_height", TubeGraspTaskConfig),
+            pregrasp_distance=_param(params, "pregrasp_distance", TubeGraspTaskConfig),
+            lift_offset=_vec_param(params, "lift_offset", TubeGraspTaskConfig),
+            pinch_forward_offset=_param(params, "pinch_forward_offset", TubeGraspTaskConfig),
+            grasp_outward_offset=_param(params, "grasp_outward_offset", TubeGraspTaskConfig),
+            tool_roll=_param(params, "tool_roll", TubeGraspTaskConfig),
+            hold_active_tube_until_grasp=_param(params, "hold_active_tube_until_grasp", TubeGraspTaskConfig),
+            ik_max_iters=_param(params, "ik_max_iters", TubeGraspTaskConfig),
+            ik_pos_tol=_param(params, "ik_pos_tol", TubeGraspTaskConfig),
+            ik_rot_tol=_param(params, "ik_rot_tol", TubeGraspTaskConfig),
+            ik_damping=_param(params, "ik_damping", TubeGraspTaskConfig),
         )
     )
 
@@ -87,34 +111,40 @@ def _create_unscrew_task(request: TaskRequest) -> BimanualUnscrewTask:
             seed=request.seed,
             cameras=request.cameras,
             with_images=request.with_images,
-            tube_arm=params["tube_arm"],
-            cap_arm=params["cap_arm"],
-            open_gripper=params["open_gripper"],
-            close_gripper=params["close_gripper"],
-            settle_steps=params["settle_steps"],
-            steps_per_segment=params["steps_per_segment"],
-            grasp_hold_steps=params["grasp_hold_steps"],
-            hold_steps=params["hold_steps"],
-            close_steps=params["close_steps"],
-            cap_hold_steps=params["cap_hold_steps"],
-            tube_grasp_height=params["grasp_height"],
-            tube_pregrasp_distance=params["pregrasp_distance"],
-            tube_lift_offset=tuple(np.asarray(params["lift_offset"], dtype=np.float64).tolist()),
-            tube_pinch_forward_offset=params["pinch_forward_offset"],
-            tube_grasp_outward_offset=params["grasp_outward_offset"],
-            tube_tool_roll=params["tube_tool_roll"] if params["tube_tool_roll"] is not None else params["tool_roll"],
-            cap_offset=tuple(np.asarray(params["cap_offset"], dtype=np.float64).tolist()),
-            cap_pregrasp_distance=params["cap_pregrasp_distance"],
-            cap_post_offset=tuple(np.asarray(params["cap_post_offset"], dtype=np.float64).tolist()),
-            cap_clearance_lift=params["cap_clearance_lift"],
-            cap_tool_roll=params["cap_tool_roll"],
-            ratchet_angle=params["ratchet_angle"],
-            thread_pitch=params["thread_pitch"],
-            release_lift=params["release_lift"],
-            ik_max_iters=params["ik_max_iters"],
-            ik_pos_tol=params["ik_pos_tol"],
-            ik_rot_tol=params["ik_rot_tol"],
-            ik_damping=params["ik_damping"],
+            tube_arm=_param(params, "tube_arm", BimanualUnscrewTaskConfig),
+            cap_arm=_param(params, "cap_arm", BimanualUnscrewTaskConfig),
+            open_gripper=_param(params, "open_gripper", BimanualUnscrewTaskConfig),
+            close_gripper=_param(params, "close_gripper", BimanualUnscrewTaskConfig),
+            settle_steps=_param(params, "settle_steps", BimanualUnscrewTaskConfig),
+            steps_per_segment=_param(params, "steps_per_segment", BimanualUnscrewTaskConfig),
+            grasp_hold_steps=_param(params, "grasp_hold_steps", BimanualUnscrewTaskConfig),
+            hold_steps=_param(params, "hold_steps", BimanualUnscrewTaskConfig),
+            close_steps=_param(params, "close_steps", BimanualUnscrewTaskConfig),
+            cap_hold_steps=_param(params, "cap_hold_steps", BimanualUnscrewTaskConfig),
+            tube_grasp_height=_param(params, "grasp_height", BimanualUnscrewTaskConfig, "tube_grasp_height"),
+            tube_pregrasp_distance=_param(params, "pregrasp_distance", BimanualUnscrewTaskConfig, "tube_pregrasp_distance"),
+            tube_lift_offset=_vec_param(params, "lift_offset", BimanualUnscrewTaskConfig, "tube_lift_offset"),
+            tube_pinch_forward_offset=_param(params, "pinch_forward_offset", BimanualUnscrewTaskConfig, "tube_pinch_forward_offset"),
+            tube_grasp_outward_offset=_param(params, "grasp_outward_offset", BimanualUnscrewTaskConfig, "tube_grasp_outward_offset"),
+            tube_tool_roll=_param(params, "tube_tool_roll", BimanualUnscrewTaskConfig),
+            cap_approach_axis=_vec_param(params, "cap_approach_axis", BimanualUnscrewTaskConfig),
+            cap_offset=_vec_param(params, "cap_offset", BimanualUnscrewTaskConfig),
+            cap_pregrasp_distance=_param(params, "cap_pregrasp_distance", BimanualUnscrewTaskConfig),
+            cap_post_offset=_vec_param(params, "cap_post_offset", BimanualUnscrewTaskConfig),
+            cap_clearance_lift=_param(params, "cap_clearance_lift", BimanualUnscrewTaskConfig),
+            cap_tool_roll=_param(params, "cap_tool_roll", BimanualUnscrewTaskConfig),
+            ratchet_angle=_param(params, "ratchet_angle", BimanualUnscrewTaskConfig),
+            thread_pitch=_param(params, "thread_pitch", BimanualUnscrewTaskConfig),
+            release_lift=_param(params, "release_lift", BimanualUnscrewTaskConfig),
+            ik_max_iters=_param(params, "ik_max_iters", BimanualUnscrewTaskConfig),
+            ik_pos_tol=_param(params, "ik_pos_tol", BimanualUnscrewTaskConfig),
+            ik_rot_tol=_param(params, "ik_rot_tol", BimanualUnscrewTaskConfig),
+            ik_damping=_param(params, "ik_damping", BimanualUnscrewTaskConfig),
+            waypoint_settle_steps=_param(params, "waypoint_settle_steps", BimanualUnscrewTaskConfig),
+            waypoint_settle_pos_tol=_param(params, "waypoint_settle_pos_tol", BimanualUnscrewTaskConfig),
+            use_topp=_param(params, "use_topp", BimanualUnscrewTaskConfig),
+            topp_vel=_param(params, "topp_vel", BimanualUnscrewTaskConfig),
+            topp_acc=_param(params, "topp_acc", BimanualUnscrewTaskConfig),
         )
     )
 

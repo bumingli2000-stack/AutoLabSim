@@ -15,6 +15,52 @@ if str(ROOT) not in sys.path:
 from autolabsim.reset_config import apply_reset_config, load_reset_config
 
 
+def add_sphere(mujoco, viewer, pos: np.ndarray, radius: float, rgba: np.ndarray) -> None:
+    if viewer.user_scn.ngeom >= viewer.user_scn.maxgeom:
+        return
+    geom = viewer.user_scn.geoms[viewer.user_scn.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_SPHERE,
+        np.asarray([radius, 0.0, 0.0], dtype=np.float64),
+        pos,
+        np.eye(3, dtype=np.float64).reshape(-1),
+        rgba,
+    )
+    viewer.user_scn.ngeom += 1
+
+
+def add_arrow(mujoco, viewer, start: np.ndarray, end: np.ndarray, radius: float, rgba: np.ndarray) -> None:
+    if viewer.user_scn.ngeom >= viewer.user_scn.maxgeom:
+        return
+    geom = viewer.user_scn.geoms[viewer.user_scn.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_ARROW,
+        np.zeros(3, dtype=np.float64),
+        np.zeros(3, dtype=np.float64),
+        np.eye(3, dtype=np.float64).reshape(-1),
+        rgba,
+    )
+    mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_ARROW, radius, start, end)
+    viewer.user_scn.ngeom += 1
+
+
+def draw_camera_markers(mujoco, model, data, viewer, camera_names: list[str] | None) -> None:
+    selected = set(camera_names) if camera_names else None
+    for camera_id in range(model.ncam):
+        camera_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_CAMERA, camera_id)
+        if selected is not None and camera_name not in selected:
+            continue
+        pos = np.asarray(data.cam_xpos[camera_id], dtype=np.float64)
+        mat = np.asarray(data.cam_xmat[camera_id], dtype=np.float64).reshape(3, 3)
+        forward = -mat[:, 2]
+        up = mat[:, 1]
+        add_sphere(mujoco, viewer, pos, 0.015, np.asarray([0.1, 0.8, 1.0, 0.85], dtype=np.float32))
+        add_arrow(mujoco, viewer, pos, pos + 0.08 * forward, 0.006, np.asarray([0.1, 0.35, 1.0, 0.9], dtype=np.float32))
+        add_arrow(mujoco, viewer, pos, pos + 0.045 * up, 0.004, np.asarray([0.1, 1.0, 0.25, 0.9], dtype=np.float32))
+
+
 def parse_group_list(raw_value: str) -> list[int]:
     groups: list[int] = []
     for part in raw_value.replace(",", " ").split():
@@ -61,6 +107,10 @@ def resolve_project_path(raw_path: str) -> Path:
     return cwd_candidate
 
 
+def parse_name_list(raw_value: str) -> list[str]:
+    return [part for part in raw_value.replace(",", " ").split() if part]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Open a MuJoCo scene XML file in the interactive viewer.")
     parser.add_argument("xml", help="Path to the scene XML file, e.g. model/scenes/scene_mujoco_fast_tubes.xml")
@@ -89,6 +139,13 @@ def main() -> None:
         help="Convenience view for gripper debugging: show visuals, collision geoms, and pinch/debug sites.",
     )
     parser.add_argument("--show-contacts", action="store_true", help="Show MuJoCo contact points in the viewer.")
+    parser.add_argument("--show-cameras", action="store_true", help="Draw camera position and orientation markers.")
+    parser.add_argument(
+        "--camera-names",
+        type=parse_name_list,
+        default=None,
+        help="Optional camera names for --show-cameras, e.g. 'wrist_cam,wrist_cam1'. Defaults to all cameras.",
+    )
     args = parser.parse_args()
 
     scene_path = resolve_scene_path(args.xml)
@@ -150,6 +207,10 @@ def main() -> None:
                 viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1
         while viewer.is_running():
             mujoco.mj_step(model, data)
+            if args.show_cameras:
+                with viewer.lock():
+                    viewer.user_scn.ngeom = 0
+                    draw_camera_markers(mujoco, model, data, viewer, args.camera_names)
             viewer.sync()
             time.sleep(model.opt.timestep)
 
