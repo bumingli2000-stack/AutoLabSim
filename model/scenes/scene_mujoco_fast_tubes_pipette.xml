@@ -143,7 +143,7 @@
     <model name="centrifuge_10slot_autobio" file="../rack/centrifuge_10slot.gen.xml" content_type="text/xml" />
     <model name="pipette" file="../tool/pipette_no_tip.gen.xml" content_type="text/xml" />
     <model name="tip_box" file="../tool/tip_box.gen.xml" content_type="text/xml" />
-    <model name="pipette_tip" file="../tool/pipette_tip.gen.xml" content_type="text/xml" />
+    <model name="pipette_tip" file="../tool/pipette_tip_1p5.gen.xml" content_type="text/xml" />
     <model name="pipette_rack" file="../tool/pipette_rack.gen.xml" content_type="text/xml" />
   </asset>
   <visual>
@@ -403,14 +403,14 @@
       <geom type="box" size="0.604 0.401 0.023" pos="0 -3 -0.306" material="vention_blue" />
       <geom type="box" size="0.604 0.401 0.411" pos="0 -3 -0.017" class="vention_collision" conaffinity="0" />
     </body>
-    <body name="centrifuge_50ml_screw_1" pos="-0.40 -3.03 0.44" quat="1 0 0 0">
+    <body name="centrifuge_50ml_screw_1" pos="0.0 -3.03 0.44" quat="1 0 0 0">
       <joint name="centrifuge_50ml_screw_joint_1" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.2" diaginertia="0.02 0.02 0.02" />
       <geom type="mesh" mesh="centrifuge_50ml_screw_body-visual" material="centrifuge_50ml_screw_body" group="0" contype="0" conaffinity="0" />
       <geom type="mesh" mesh="centrifuge_50ml_screw_body-visual" material="centrifuge_50ml_screw_body" condim="3" friction="0.5 0.01 0.01" group="0" contype="1" conaffinity="1" />
       <geom name="tube_body_cyl_1" type="cylinder" size="0.013 0.0513" pos="0 0 0.0513" friction="1.2 0.02 0.02" condim="4" priority="2" group="5" rgba="0.7 0.9 1 0.15" contype="0" conaffinity="0" />
     </body>
-    <body name="centrifuge_50ml_screw_cap_1" pos="-0.40 -3.03 0.56" quat="0 1 0 0">
+    <body name="centrifuge_50ml_screw_cap_1" pos="0.0 -3.03 0.56" quat="0 1 0 0">
       <joint name="centrifuge_50ml_screw_cap_joint_1" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.05" diaginertia="0.005 0.005 0.005" />
       <geom type="mesh" mesh="centrifuge_50ml_screw_cap-visual" material="centrifuge_50ml_screw_cap" group="0" contype="0" conaffinity="0" />
@@ -421,19 +421,54 @@
       <frame pos="-0.3 -0.1 0">
         <attach model="pipette_rack" body="pipette_rack" prefix="piprack" />
       </frame>
-      <frame pos="-0.3 -0.02 0.26"  euler="0.3 0 -1.5708">
-        <attach model="pipette" body="pipette" prefix="pip" />
-      </frame>
-      <frame pos="-0.06 0 0.02">
+      <frame pos="0.061 0 0.02">
         <attach model="tip_box" body="tip_box" prefix="tipbox" scale="1.5" />
       </frame>
-      <replicate count="6" offset="0.008 0 0">
-        <replicate count="4" offset="0 0.008 0">
-          <body name="pipette_tip" pos="-0.081 -0.012 0.056">
-            <attach model="pipette_tip" body="pipette_tip" prefix="tip" scale="1.5" />
-          </body>
-        </replicate>
-      </replicate>
+    </body>
+    <body name="pipette_free" pos="0.5 -2.78 0.65" euler="-0.3 0 1.5708">
+      <joint name="pipette_joint" type="free" damping="1.0" armature="0.01" />
+      <inertial pos="0 0 0" mass="0.12" diaginertia="0.002 0.002 0.002" />
+      <attach model="pipette" body="pipette" prefix="pip" />
+    </body>
+    <body name="pipette_tip_01" pos="0.119 -2.812 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_01" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip01" />
+    </body>
+    <body name="pipette_tip_02" pos="0.127 -2.812 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_02" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip02" />
+    </body>
+    <body name="pipette_tip_03" pos="0.135 -2.812 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_03" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip03" />
+    </body>
+    <body name="pipette_tip_04" pos="0.143 -2.812 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_04" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip04" />
+    </body>
+    <body name="pipette_tip_05" pos="0.119 -2.804 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_05" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip05" />
+    </body>
+    <body name="pipette_tip_06" pos="0.127 -2.804 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_06" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip06" />
+    </body>
+    <body name="pipette_tip_07" pos="0.135 -2.804 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_07" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip07" />
+    </body>
+    <body name="pipette_tip_08" pos="0.143 -2.804 0.446" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_08" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip08" />
     </body>
   </worldbody>
   <actuator>
@@ -457,6 +492,7 @@
   </contact>
   <equality>
     <weld name="centrifuge_50ml_screw_cap_weld_1" body1="centrifuge_50ml_screw_1" body2="centrifuge_50ml_screw_cap_1" solref="0.03 1" solimp="0.85 0.93 0.003" torquescale="0.02" />
+    <weld name="pipette_rack_weld" body1="pipette_station" body2="pipette_free" solref="0.03 1" solimp="0.85 0.93 0.003" torquescale="0.02" />
   </equality>
   <sensor>
     <framepos name="base_link_site_pos" objtype="site" objname="base_link_site" />

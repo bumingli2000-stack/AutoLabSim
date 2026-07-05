@@ -31,6 +31,7 @@ def apply_reset_config(model: Any, data: Any, mujoco: Any, config: ResetConfig, 
     _apply_actuator_targets(model, data, mujoco, config.get("actuators", {}))
     _apply_free_joint_poses(model, data, mujoco, config.get("free_joints", {}))
     resolved.update(_apply_random_single_free_joint(model, data, mujoco, config.get("random_single_free_joint"), rng))
+    resolved.update(_apply_random_free_joint_subset(model, data, mujoco, config.get("random_free_joint_subset"), rng))
     return resolved
 
 
@@ -123,6 +124,59 @@ def _apply_random_single_free_joint(
             },
         }
     }
+
+
+def _apply_random_free_joint_subset(
+    model: Any,
+    data: Any,
+    mujoco: Any,
+    config: dict[str, Any] | None,
+    rng: np.random.Generator,
+) -> ResetConfig:
+    if not config:
+        return {}
+
+    joints = list(config["joints"])
+    slots = list(config["slots"])
+    inactive_pose = config.get("inactive_pose", {"pos": [0.0, 0.0, -10.0], "quat": [1.0, 0.0, 0.0, 0.0]})
+    count = _subset_count(config.get("count", len(joints)), len(joints), len(slots), rng)
+    active_indices = rng.choice(len(joints), size=count, replace=False) if count else np.asarray([], dtype=np.int64)
+    slot_indices = rng.choice(len(slots), size=count, replace=False) if count else np.asarray([], dtype=np.int64)
+    active_slots = {int(joint_index): int(slot_index) for joint_index, slot_index in zip(active_indices, slot_indices)}
+    active: list[dict[str, Any]] = []
+
+    for joint_index, joint_name in enumerate(joints):
+        if joint_index not in active_slots:
+            _apply_free_joint_poses(model, data, mujoco, {joint_name: inactive_pose})
+            continue
+
+        slot_index = active_slots[joint_index]
+        slot = slots[slot_index]
+        _apply_free_joint_poses(model, data, mujoco, {joint_name: slot})
+        active.append(
+            {
+                "joint": str(joint_name),
+                "slot_index": slot_index,
+                "slot_name": slot.get("name", str(slot_index)),
+                "pose": {
+                    "pos": list(slot["pos"]),
+                    "quat": list(slot["quat"]),
+                },
+            }
+        )
+
+    return {"random_free_joint_subset": {"active": active, "inactive_pose": inactive_pose}}
+
+
+def _subset_count(count_config: Any, num_joints: int, num_slots: int, rng: np.random.Generator) -> int:
+    limit = min(num_joints, num_slots)
+    if isinstance(count_config, dict):
+        low = int(count_config.get("min", 0))
+        high = int(count_config.get("max", limit))
+        if high < low:
+            raise ValueError("random_free_joint_subset count.max must be >= count.min")
+        return int(rng.integers(max(0, low), min(limit, high) + 1))
+    return min(limit, max(0, int(count_config)))
 
 
 def _companion_pose(parent_pose: dict[str, Any], companion_pose: dict[str, Any]) -> dict[str, Any]:
