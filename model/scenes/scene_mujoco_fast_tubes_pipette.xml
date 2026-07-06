@@ -418,14 +418,14 @@
       <geom name="tube_cap_cyl_1" type="cylinder" size="0.0176 0.0062" pos="0 0 0.0062" friction="1.2 0.02 0.02" condim="4" priority="2" margin="0.0001" group="5" rgba="1 0.8 0.6 0.15" contype="0" conaffinity="0" />
     </body>
     <body name="pipette_station" pos="0.2 -2.8 0.39" quat="0 0 0 1">
-      <frame pos="-0.3 -0.1 0">
+      <frame pos="-0.3 0.0 0" euler="0.0 0.0 1.5708">
         <attach model="pipette_rack" body="pipette_rack" prefix="piprack" />
       </frame>
       <frame pos="0.061 0 0.02">
         <attach model="tip_box" body="tip_box" prefix="tipbox" scale="1.5" />
       </frame>
     </body>
-    <body name="pipette_free" pos="0.5 -2.78 0.65" euler="-0.3 0 1.5708">
+    <body name="pipette_free" pos="0.45 -2.78 0.65" euler="0.0 0.3 0">
       <joint name="pipette_joint" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.12" diaginertia="0.002 0.002 0.002" />
       <attach model="pipette" body="pipette" prefix="pip" />

@@ -121,6 +121,13 @@ python scripts/generate_tube_grasp_batch.py \
   --cameras overview_camera,wrist_cam,wrist_cam1 \
   --out-root data/episodes/bimanual_unscrew_video_test
 ```
+```bash
+python scripts/generate_pipette_grasp_batch.py \
+  --count 1 \
+  --with-images \
+  --cameras overview_camera,wrist_cam,wrist_cam1 \
+  --out-root data/episodes/pipette_grasp_batch
+```
 
 ### Export Episode Video
 
@@ -132,6 +139,13 @@ python scripts/export_episode_images.py \
   --fps 20
 ```
 
+```bash
+python scripts/export_episode_images.py \
+  data/episodes/pipette_grasp_batch \
+  --camera overview_camera,wrist_cam,wrist_cam1 \
+  --format mp4 \
+  --fps 20
+```
 ## GitHub Upload and Sync
 
 This repository currently uses:

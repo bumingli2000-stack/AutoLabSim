@@ -42,6 +42,28 @@ def build_batch_parser() -> argparse.ArgumentParser:
     parser.add_argument("--gl-backend", default=None, help="MuJoCo GL backend for image rendering, for example egl or glfw.")
     parser.add_argument("--frame-skip", type=int, default=None, help="Override frame_skip.")
     parser.add_argument("--dry-run", action="store_true", help="Print episode plan without generating episodes.")
+    parser.add_argument("--arm", default=None, help="Task arm selector for supported tasks, for example first or second.")
+    parser.add_argument("--open-gripper", type=float, default=None, help="Open gripper control value for supported tasks.")
+    parser.add_argument("--close-gripper", type=float, default=None, help="Closed gripper control value for supported tasks.")
+    parser.add_argument("--settle-steps", type=int, default=None, help="Initial settle steps for supported tasks.")
+    parser.add_argument("--steps-per-segment", type=int, default=None, help="Motion interpolation steps for supported tasks.")
+    parser.add_argument("--close-steps", type=int, default=None, help="Gripper close/open interpolation steps for supported tasks.")
+    parser.add_argument("--hold-steps", type=int, default=None, help="Final hold steps for supported tasks.")
+    parser.add_argument("--grasp-hold-steps", type=int, default=None, help="Hold steps before closing gripper for supported tasks.")
+    parser.add_argument("--pregrasp-distance", type=float, default=None, help="Pregrasp offset distance for supported tasks.")
+    parser.add_argument("--grasp-offset", default=None, help="Object-relative grasp offset as 'x y z' for supported tasks.")
+    parser.add_argument("--lift-offset", default=None, help="Object lift offset as 'x y z' for supported tasks.")
+    parser.add_argument("--tool-roll", type=float, default=None, help="Tool roll angle in radians for supported tasks.")
+    parser.add_argument("--pipette-joint", default=None, help="Pipette free joint name for pipette_grasp.")
+    parser.add_argument("--pipette-body", default=None, help="Pipette body name used as grasp reference for pipette_grasp.")
+    parser.add_argument("--parking-weld", default=None, help="Optional parking weld equality name released after grasp.")
+    parser.add_argument("--vertical-quat", default=None, help="Target lifted pipette quaternion as 'w x y z'.")
+    parser.add_argument("--ik-max-iters", type=int, default=None, help="IK iteration limit for supported tasks.")
+    parser.add_argument("--ik-pos-tol", type=float, default=None, help="IK position tolerance for supported tasks.")
+    parser.add_argument("--ik-rot-tol", type=float, default=None, help="IK rotation tolerance for supported tasks.")
+    parser.add_argument("--ik-damping", type=float, default=None, help="IK damping for supported tasks.")
+    parser.add_argument("--waypoint-settle-steps", type=int, default=None, help="Waypoint settle steps for supported tasks.")
+    parser.add_argument("--waypoint-settle-pos-tol", type=float, default=None, help="Waypoint settle position tolerance.")
     return parser
 
 
@@ -144,7 +166,9 @@ def run_batch(args: argparse.Namespace) -> int:
         extra = ""
         if "screw_released" in summary:
             extra = f" released={summary['screw_released']} twist={summary['twist_angle']:.3f}"
-        print(f"  ok: steps={summary['steps']} slot={summary['slot_name']} ik={summary['ik_all_waypoints_solved']}{extra}")
+        slot = summary.get("slot_name")
+        slot_text = f" slot={slot}" if slot is not None else ""
+        print(f"  ok: steps={summary['steps']}{slot_text} ik={summary['ik_all_waypoints_solved']}{extra}")
 
     manifest_path = out_root / "manifest.json"
     with manifest_path.open("w", encoding="utf-8") as handle:

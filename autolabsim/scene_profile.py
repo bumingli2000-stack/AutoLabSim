@@ -39,6 +39,13 @@ SCENE_REGISTRY: dict[str, SceneSpec] = {
         cameras=("overview_camera",),
         naming=DEFAULT_SCENE_NAMING,
     ),
+    "fast_tubes_pipette": SceneSpec(
+        name="fast_tubes_pipette",
+        model_path="model/scenes/scene_mujoco_fast_tubes_pipette.xml",
+        reset_config="configs/reset_pipette_tips_random_subset.json",
+        cameras=("overview_camera",),
+        naming=DEFAULT_SCENE_NAMING,
+    ),
     "default": SceneSpec(
         name="default",
         model_path="model/scenes/scene_mujoco.xml",
