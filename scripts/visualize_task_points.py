@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.math3d import gripper_quat_from_axes, unit
+from autolabsim.math3d import gripper_quat_from_axes, mat_to_quat, quat_to_mat, unit
+from autolabsim.grasp_pose import LocalGraspPose, local_grasp_to_world_target
 from autolabsim.scene import (
     actuator_id,
     body_pos,
@@ -25,6 +26,7 @@ from autolabsim.scene import (
 )
 from autolabsim.reset_config import apply_reset_config, load_reset_config
 from autolabsim.tasks.common import ARM_DEFAULTS, cap_body_from_tube_joint, random_reset_info
+from autolabsim.tasks.pipette_grasp import PipetteGraspTaskConfig
 
 TASK_DEFAULTS = {
     "tube_grasp": {
@@ -53,6 +55,13 @@ TASK_DEFAULTS = {
         "approach_axis": None,
         "closing_axis": None,
         "tool_roll": float(np.pi),
+        "grasp_outward_offset": 0.0,
+    },
+    "pipette_grasp": {
+        "arm": "first",
+        "approach_axis": None,
+        "closing_axis": None,
+        "tool_roll": 0.0,
         "grasp_outward_offset": 0.0,
     },
 }
@@ -111,6 +120,38 @@ def add_connector(
     )
     mujoco.mjv_connector(geom, geom_type, radius, start, end)
     viewer.user_scn.ngeom += 1
+
+
+def add_frame_axes(
+    mujoco: Any,
+    viewer: Any,
+    pos: np.ndarray,
+    mat: np.ndarray,
+    scale: float,
+    radius: float,
+    alpha: float = 0.95,
+) -> None:
+    colors = (
+        np.asarray([1.0, 0.05, 0.05, alpha], dtype=np.float32),
+        np.asarray([0.05, 0.9, 0.15, alpha], dtype=np.float32),
+        np.asarray([0.1, 0.25, 1.0, alpha], dtype=np.float32),
+    )
+    for axis_id, color in enumerate(colors):
+        start = np.asarray(pos, dtype=np.float64)
+        end = start + float(scale) * np.asarray(mat, dtype=np.float64).reshape(3, 3)[:, axis_id]
+        add_connector(mujoco, viewer, mujoco.mjtGeom.mjGEOM_ARROW, start, end, radius, color)
+
+
+def frame_pose(mujoco: Any, name: str, pos: np.ndarray, mat: np.ndarray) -> dict[str, Any]:
+    mat = np.asarray(mat, dtype=np.float64).reshape(3, 3)
+    return {
+        "name": name,
+        "pos": np.asarray(pos, dtype=np.float64).tolist(),
+        "quat_wxyz": mat_to_quat(mujoco, mat).tolist(),
+        "x_axis": mat[:, 0].tolist(),
+        "y_axis": mat[:, 1].tolist(),
+        "z_axis": mat[:, 2].tolist(),
+    }
 
 
 def resolve_arm(args: argparse.Namespace) -> str:
@@ -207,14 +248,84 @@ def marker_plan(
 def prefix_plan(plan: dict[str, Any], prefix: str) -> dict[str, Any]:
     prefixed = {
         "poses": {f"{prefix}_{name}": pose for name, pose in plan["poses"].items()},
+        "frames": [],
         "markers": [],
         "connectors": [],
     }
+    for frame in plan.get("frames", []):
+        prefixed["frames"].append({**frame, "name": f"{prefix}_{frame['name']}"})
     for marker in plan["markers"]:
         prefixed["markers"].append({**marker, "name": f"{prefix}_{marker['name']}"})
     for connector in plan["connectors"]:
         prefixed["connectors"].append({**connector, "name": f"{prefix}_{connector['name']}"})
     return prefixed
+
+
+def body_frame(model: Any, data: Any, mujoco: Any, body_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+    if body_id < 0:
+        raise ValueError(f"Unknown body: {body_name}")
+    pos = np.asarray(data.xpos[body_id], dtype=np.float64).copy()
+    mat = np.asarray(data.xmat[body_id], dtype=np.float64).reshape(3, 3).copy()
+    return pos, mat_to_quat(mujoco, mat), mat
+
+
+def site_frame(model: Any, data: Any, mujoco: Any, site_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
+    site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, site_name)
+    if site_id < 0:
+        return None
+    pos = np.asarray(data.site_xpos[site_id], dtype=np.float64).copy()
+    mat = np.asarray(data.site_xmat[site_id], dtype=np.float64).reshape(3, 3).copy()
+    return pos, mat_to_quat(mujoco, mat), mat
+
+
+def tip_site_name(joint_name: str, joint_prefix: str, site_prefix: str, suffix: str) -> str:
+    if not joint_name.startswith(joint_prefix):
+        raise ValueError(f"Tip joint does not match prefix {joint_prefix!r}: {joint_name}")
+    return f"{site_prefix}{joint_name[len(joint_prefix):]}{suffix}"
+
+
+def nearest_active_tip_site_frames(
+    model: Any,
+    data: Any,
+    mujoco: Any,
+    args: argparse.Namespace,
+    pipette_tip_pos: np.ndarray,
+    reset_info: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    subset_info = (reset_info or {}).get("random_free_joint_subset", {})
+    active = subset_info.get("active", []) if isinstance(subset_info, dict) else []
+    candidates = [str(item["joint"]) for item in active if isinstance(item, dict) and "joint" in item]
+    if not candidates:
+        candidates = []
+        for joint_id in range(model.njnt):
+            joint_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, joint_id)
+            if joint_name and joint_name.startswith(args.tip_joint_prefix):
+                candidates.append(joint_name)
+
+    best: dict[str, Any] | None = None
+    for joint_name in candidates:
+        mount_site = tip_site_name(joint_name, args.tip_joint_prefix, args.tip_site_prefix, args.tip_mount_site_suffix)
+        end_site = tip_site_name(joint_name, args.tip_joint_prefix, args.tip_site_prefix, args.tip_end_site_suffix)
+        mount_frame = site_frame(model, data, mujoco, mount_site)
+        if mount_frame is None:
+            continue
+        mount_pos, mount_quat, mount_mat = mount_frame
+        end_frame = site_frame(model, data, mujoco, end_site)
+        distance = float(np.linalg.norm(mount_pos[:2] - pipette_tip_pos[:2]))
+        item = {
+            "joint": joint_name,
+            "mount_site": mount_site,
+            "mount_pos": mount_pos,
+            "mount_quat": mount_quat,
+            "mount_mat": mount_mat,
+            "end_site": end_site if end_frame is not None else None,
+            "end_frame": end_frame,
+            "xy_distance": distance,
+        }
+        if best is None or distance < best["xy_distance"]:
+            best = item
+    return best
 
 
 def plan_tube_grasp_points(
@@ -391,6 +502,7 @@ def plan_tube_then_cap_grasp_points(
     cap_prefixed = prefix_plan(cap_plan, "cap")
     return {
         "poses": {**tube_prefixed["poses"], **cap_prefixed["poses"]},
+        "frames": [*tube_prefixed.get("frames", []), *cap_prefixed.get("frames", [])],
         "markers": [*tube_prefixed["markers"], *cap_prefixed["markers"]],
         "connectors": [*tube_prefixed["connectors"], *cap_prefixed["connectors"]],
         "metadata": {
@@ -482,6 +594,7 @@ def plan_bimanual_unscrew_cap_points(
     tube_prefixed = prefix_plan(lifted_tube_plan, "tube_after_cap_lift")
     return {
         "poses": {**cap_prefixed["poses"], **tube_prefixed["poses"]},
+        "frames": [*cap_prefixed.get("frames", []), *tube_prefixed.get("frames", [])],
         "markers": [*cap_prefixed["markers"], *tube_prefixed["markers"]],
         "connectors": [*cap_prefixed["connectors"], *tube_prefixed["connectors"]],
         "metadata": {
@@ -544,11 +657,183 @@ def plan_tube_grasp_points_at_pos(
     return plan
 
 
+def plan_pipette_grasp_points(
+    model: Any,
+    data: Any,
+    mujoco: Any,
+    args: argparse.Namespace,
+    active_joint: str,
+    random_info: dict[str, Any] | None,
+) -> dict[str, Any]:
+    arm = resolve_arm(args)
+    target = local_grasp_to_world_target(
+        model,
+        data,
+        mujoco,
+        LocalGraspPose(
+            body=args.pipette_body,
+            pos=tuple(np.asarray(args.handle_grasp_offset, dtype=np.float64).tolist()),
+            euler=tuple(np.asarray(args.handle_grasp_euler, dtype=np.float64).tolist()),
+            gripper_pos=tuple(np.asarray(args.grasp_to_gripper_offset, dtype=np.float64).tolist()),
+            gripper_euler=tuple(np.asarray(args.grasp_to_gripper_euler, dtype=np.float64).tolist()),
+        ),
+    )
+    button_dir = unit(target.body_mat[:, 2], "pipette_button_direction")
+    tip_dir = -button_dir
+    approach_axis = target.gripper_mat[:, 2]
+    closing_axis = target.gripper_mat[:, 1]
+    pregrasp_pos = target.gripper_pos - approach_axis * float(args.pregrasp_distance)
+    post_pos = target.gripper_pos + np.asarray(args.pipette_lift_offset, dtype=np.float64)
+    plan = marker_plan(mujoco, approach_axis, closing_axis, 0.0, pregrasp_pos, target.gripper_pos, post_pos)
+
+    frames = [
+        {
+            "name": "pipette_body_frame",
+            "pos": target.body_pos,
+            "mat": target.body_mat,
+            "scale": 0.075,
+            "radius": 0.0045,
+            "pose": frame_pose(mujoco, "pipette_body_frame", target.body_pos, target.body_mat),
+        },
+        {
+            "name": "local_grasp_frame",
+            "pos": target.grasp_pos,
+            "mat": target.grasp_mat,
+            "scale": 0.07,
+            "radius": 0.004,
+            "pose": frame_pose(mujoco, "local_grasp_frame", target.grasp_pos, target.grasp_mat),
+        },
+        {
+            "name": "planned_grasp_gripper_frame",
+            "pos": target.gripper_pos,
+            "mat": target.gripper_mat,
+            "scale": 0.085,
+            "radius": 0.005,
+            "pose": frame_pose(mujoco, "planned_grasp_gripper_frame", target.gripper_pos, target.gripper_mat),
+        },
+    ]
+
+    gripper_site_name = args.gripper_site or str(ARM_DEFAULTS[arm]["gripper_site"])
+    gripper_frame = site_frame(model, data, mujoco, gripper_site_name)
+    if gripper_frame is not None:
+        gripper_pos, _, gripper_mat = gripper_frame
+        frames.append(
+            {
+                "name": "current_gripper_site_frame",
+                "pos": gripper_pos,
+                "mat": gripper_mat,
+                "scale": 0.085,
+                "radius": 0.004,
+                "pose": frame_pose(mujoco, "current_gripper_site_frame", gripper_pos, gripper_mat),
+            }
+        )
+
+    tip_frame = site_frame(model, data, mujoco, args.pipette_tip_site)
+    tip_site_pose = None
+    target_tip_info = None
+    if tip_frame is not None:
+        tip_pos, _, tip_mat = tip_frame
+        tip_site_pose = frame_pose(mujoco, "pipette_tip_site_frame", tip_pos, tip_mat)
+        frames.append(
+            {
+                "name": "pipette_tip_site_frame",
+                "pos": tip_pos,
+                "mat": tip_mat,
+                "scale": 0.045,
+                "radius": 0.003,
+                "pose": tip_site_pose,
+            }
+        )
+        plan["markers"].append(
+            {"name": "pipette_tip_site", "pos": tip_pos, "radius": 0.01, "rgba": np.asarray([0.1, 0.9, 1.0, 0.85], dtype=np.float32)}
+        )
+        target_tip = nearest_active_tip_site_frames(model, data, mujoco, args, tip_pos, random_info)
+        if target_tip is not None:
+            mount_pose = frame_pose(
+                mujoco,
+                "target_tip_mount_site_frame",
+                target_tip["mount_pos"],
+                target_tip["mount_mat"],
+            )
+            frames.append(
+                {
+                    "name": "target_tip_mount_site_frame",
+                    "pos": target_tip["mount_pos"],
+                    "mat": target_tip["mount_mat"],
+                    "scale": 0.05,
+                    "radius": 0.0035,
+                    "pose": mount_pose,
+                }
+            )
+            plan["markers"].append(
+                {
+                    "name": "target_tip_mount_site",
+                    "pos": target_tip["mount_pos"],
+                    "radius": 0.008,
+                    "rgba": np.asarray([1.0, 0.1, 0.1, 0.85], dtype=np.float32),
+                }
+            )
+            end_pose = None
+            if target_tip["end_frame"] is not None:
+                end_pos, _, end_mat = target_tip["end_frame"]
+                end_pose = frame_pose(mujoco, "target_tip_end_site_frame", end_pos, end_mat)
+                frames.append(
+                    {
+                        "name": "target_tip_end_site_frame",
+                        "pos": end_pos,
+                        "mat": end_mat,
+                        "scale": 0.04,
+                        "radius": 0.0025,
+                        "pose": end_pose,
+                    }
+                )
+                plan["markers"].append(
+                    {
+                        "name": "target_tip_end_site",
+                        "pos": end_pos,
+                        "radius": 0.006,
+                        "rgba": np.asarray([0.1, 0.9, 0.1, 0.85], dtype=np.float32),
+                    }
+                )
+            target_tip_info = {
+                "joint": target_tip["joint"],
+                "mount_site": target_tip["mount_site"],
+                "mount_site_pose": mount_pose,
+                "end_site": target_tip["end_site"],
+                "end_site_pose": end_pose,
+                "xy_distance_to_pipette_tip_site": target_tip["xy_distance"],
+            }
+
+    plan["frames"] = frames
+    plan["metadata"] = {
+        "task": args.task,
+        "arm": arm,
+        "gripper_site": gripper_site_name,
+        "pipette_body": args.pipette_body,
+        "pipette_body_pos": target.body_pos.tolist(),
+        "pipette_body_quat_wxyz": target.body_quat.tolist(),
+        "pipette_tip_site": args.pipette_tip_site,
+        "pipette_tip_site_pose": tip_site_pose,
+        "target_tip": target_tip_info,
+        "handle_grasp_offset_body": np.asarray(args.handle_grasp_offset, dtype=np.float64).tolist(),
+        "handle_grasp_euler_xyz": np.asarray(args.handle_grasp_euler, dtype=np.float64).tolist(),
+        "grasp_to_gripper_offset": np.asarray(args.grasp_to_gripper_offset, dtype=np.float64).tolist(),
+        "grasp_to_gripper_euler_xyz": np.asarray(args.grasp_to_gripper_euler, dtype=np.float64).tolist(),
+        "approach_axis": approach_axis.tolist(),
+        "closing_axis": closing_axis.tolist(),
+        "button_direction_world": button_dir.tolist(),
+        "tip_direction_world": tip_dir.tolist(),
+        "frames": [frame["pose"] for frame in frames],
+    }
+    return plan
+
+
 PLANNERS: dict[str, Planner] = {
     "bimanual_unscrew_cap": plan_bimanual_unscrew_cap_points,
     "tube_grasp": plan_tube_grasp_points,
     "cap_grasp": plan_cap_grasp_points,
     "tube_then_cap_grasp": plan_tube_then_cap_grasp_points,
+    "pipette_grasp": plan_pipette_grasp_points,
 }
 
 
@@ -604,6 +889,43 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tube-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for tube grasp stage.")
     parser.add_argument("--cap-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for cap grasp stage.")
 
+    parser.add_argument("--pipette-body", default="pippipette", help="[pipette_grasp] Pipette body used as the local grasp reference.")
+    parser.add_argument("--pipette-tip-site", default="piptip_site", help="[pipette_grasp] Pipette tip site to visualize.")
+    parser.add_argument("--tip-joint-prefix", default=PipetteGraspTaskConfig.tip_joint_prefix, help="[pipette_grasp] Prefix for visible tip free joints.")
+    parser.add_argument("--tip-site-prefix", default=PipetteGraspTaskConfig.tip_site_prefix, help="[pipette_grasp] Prefix added to attached tip sites.")
+    parser.add_argument("--tip-mount-site-suffix", default=PipetteGraspTaskConfig.tip_mount_site_suffix, help="[pipette_grasp] Suffix for tip mount interface site.")
+    parser.add_argument("--tip-end-site-suffix", default=PipetteGraspTaskConfig.tip_end_site_suffix, help="[pipette_grasp] Suffix for tip end site.")
+    parser.add_argument(
+        "--handle-grasp-offset",
+        type=lambda value: parse_vec3(value, "handle_grasp_offset"),
+        default=list(PipetteGraspTaskConfig.handle_grasp_offset),
+        help="[pipette_grasp] Body-local handle grasp offset.",
+    )
+    parser.add_argument(
+        "--handle-grasp-euler",
+        type=lambda value: parse_vec3(value, "handle_grasp_euler"),
+        default=list(PipetteGraspTaskConfig.handle_grasp_euler),
+        help="[pipette_grasp] Body-local grasp frame XYZ Euler angles in radians.",
+    )
+    parser.add_argument(
+        "--grasp-to-gripper-offset",
+        type=lambda value: parse_vec3(value, "grasp_to_gripper_offset"),
+        default=list(PipetteGraspTaskConfig.grasp_to_gripper_offset),
+        help="[pipette_grasp] Grasp-frame-local gripper target offset.",
+    )
+    parser.add_argument(
+        "--grasp-to-gripper-euler",
+        type=lambda value: parse_vec3(value, "grasp_to_gripper_euler"),
+        default=list(PipetteGraspTaskConfig.grasp_to_gripper_euler),
+        help="[pipette_grasp] Grasp-frame-local gripper XYZ Euler angles in radians.",
+    )
+    parser.add_argument(
+        "--pipette-lift-offset",
+        type=lambda value: parse_vec3(value, "pipette_lift_offset"),
+        default=list(PipetteGraspTaskConfig.lift_offset),
+        help="[pipette_grasp] World XYZ offset from grasp to post point.",
+    )
+
     parser.add_argument("--viewer", action="store_true", help="Preview target markers in the MuJoCo viewer.")
     parser.add_argument("--steps-per-sync", type=int, default=5, help="Simulation steps between viewer syncs.")
     parser.add_argument("--settle-steps", type=int, default=20, help="Control steps before computing target markers.")
@@ -617,6 +939,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.task == "pipette_grasp":
+        if args.model == "model/scenes/scene_mujoco_fast_tubes.xml":
+            args.model = "model/scenes/scene_mujoco_fast_tubes_pipette.xml"
+        if args.reset_config == "configs/reset_single_tube_random.json":
+            args.reset_config = "configs/reset_pipette_tips_random_subset.json"
     os.environ.setdefault("MUJOCO_GL", "glfw" if args.viewer else "egl")
 
     import mujoco
@@ -676,6 +1003,7 @@ def main() -> None:
             "gripper_local_y": "Robotiq finger closing axis",
         },
         "poses": plan["poses"],
+        "frames": [frame["pose"] for frame in plan.get("frames", [])],
         "current_site": current_site_info(model, data, mujoco, gripper_site),
         "reset_info": reset_info,
     }
@@ -686,7 +1014,8 @@ def main() -> None:
 
     import mujoco.viewer
 
-    print("viewer markers: yellow=pregrasp, green=grasp, blue=post, red arrow=approach, purple line=gripper local +Y")
+    print("viewer markers: yellow=pregrasp, green=grasp, blue=post, cyan=pipette tip site")
+    print("viewer frames: red=X, green=Y, blue=Z; planned_grasp_gripper_frame shows desired gripper end-effector frame")
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
             step_start = time.time()
@@ -709,6 +1038,15 @@ def main() -> None:
                         connector["end"],
                         connector["radius"],
                         connector["rgba"],
+                    )
+                for frame in plan.get("frames", []):
+                    add_frame_axes(
+                        mujoco,
+                        viewer,
+                        frame["pos"],
+                        frame["mat"],
+                        frame["scale"],
+                        frame["radius"],
                     )
             viewer.sync()
 

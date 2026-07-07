@@ -62,6 +62,17 @@ def mat_to_quat(mujoco, mat: np.ndarray) -> np.ndarray:
     return normalize_quat(quat)
 
 
+def euler_xyz_to_mat(euler: np.ndarray) -> np.ndarray:
+    roll, pitch, yaw = np.asarray(euler, dtype=np.float64)
+    cr, sr = float(np.cos(roll)), float(np.sin(roll))
+    cp, sp = float(np.cos(pitch)), float(np.sin(pitch))
+    cy, sy = float(np.cos(yaw)), float(np.sin(yaw))
+    rx = np.asarray([[1.0, 0.0, 0.0], [0.0, cr, -sr], [0.0, sr, cr]], dtype=np.float64)
+    ry = np.asarray([[cp, 0.0, sp], [0.0, 1.0, 0.0], [-sp, 0.0, cp]], dtype=np.float64)
+    rz = np.asarray([[cy, -sy, 0.0], [sy, cy, 0.0], [0.0, 0.0, 1.0]], dtype=np.float64)
+    return rz @ ry @ rx
+
+
 def axis_angle_quat(axis: np.ndarray, angle: float) -> np.ndarray:
     axis = unit(axis, "axis")
     half = angle * 0.5
