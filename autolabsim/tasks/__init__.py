@@ -1,5 +1,4 @@
 from dataclasses import MISSING, dataclass, fields
-import importlib
 from pathlib import Path
 from typing import Any, Callable
 
@@ -7,10 +6,19 @@ import numpy as np
 
 from ..mujoco_env import EnvConfig
 from .screw_cap import BimanualUnscrewTask, BimanualUnscrewTaskConfig
-from .pipette_grasp import PipetteGraspTask, PipetteGraspTaskConfig
-
-TubeGraspTask: Any | None = None
-TubeGraspTaskConfig: Any | None = None
+from .pipette_grasp import (
+    IKConfig,
+    PipetteGraspTask,
+    PipetteGraspTaskConfig,
+    PipetteHandleGraspConfig,
+    PipetteModelConfig,
+    PipetteRobotConfig,
+    PipetteTimingConfig,
+    PipetteTipTargetConfig,
+    PipetteTubeTargetConfig,
+    VisualServoConfig,
+    WaypointSettleConfig,
+)
 
 
 @dataclass(frozen=True)
@@ -84,63 +92,91 @@ def _quat_param(params: dict[str, Any], key: str, config_cls: type) -> tuple[flo
     return tuple(arr.tolist())
 
 
-def _load_tube_grasp() -> tuple[Any, Any]:
-    global TubeGraspTask, TubeGraspTaskConfig
-    if TubeGraspTask is not None and TubeGraspTaskConfig is not None:
-        return TubeGraspTask, TubeGraspTaskConfig
-
-    try:
-        module = importlib.import_module(".tube_grasp", __package__)
-    except ModuleNotFoundError as exc:
-        if exc.name != f"{__package__}.tube_grasp":
-            raise
-        raise ValueError(
-            "tube_grasp task is unavailable because autolabsim.tasks.tube_grasp is missing"
-        ) from exc
-
-    TubeGraspTask = module.TubeGraspTask
-    TubeGraspTaskConfig = module.TubeGraspTaskConfig
-    return TubeGraspTask, TubeGraspTaskConfig
-
-
-def _create_tube_grasp_task(request: TaskRequest) -> Any:
-    tube_task_cls, tube_config_cls = _load_tube_grasp()
-    if TubeGraspTask is None or TubeGraspTaskConfig is None:
-        raise ValueError("tube_grasp task is unavailable because autolabsim.tasks.tube_grasp is missing")
-    params = request.params
-    return tube_task_cls(
-        tube_config_cls(
-            env=_make_env(request),
-            out_dir=request.out_dir,
-            episode_index=request.episode_index,
-            seed=request.seed,
-            cameras=request.cameras,
-            with_images=request.with_images,
-            arm=_param(params, "arm", tube_config_cls),
-            open_gripper=_param(params, "open_gripper", tube_config_cls),
-            close_gripper=_param(params, "close_gripper", tube_config_cls),
-            settle_steps=_param(params, "settle_steps", tube_config_cls),
-            steps_per_segment=_param(params, "steps_per_segment", tube_config_cls),
-            grasp_hold_steps=_param(params, "grasp_hold_steps", tube_config_cls),
-            close_steps=_param(params, "close_steps", tube_config_cls),
-            hold_steps=_param(params, "hold_steps", tube_config_cls),
-            grasp_height=_param(params, "grasp_height", tube_config_cls),
-            pregrasp_distance=_param(params, "pregrasp_distance", tube_config_cls),
-            lift_offset=_vec_param(params, "lift_offset", tube_config_cls),
-            pinch_forward_offset=_param(params, "pinch_forward_offset", tube_config_cls),
-            grasp_outward_offset=_param(params, "grasp_outward_offset", tube_config_cls),
-            tool_roll=_param(params, "tool_roll", tube_config_cls),
-            hold_active_tube_until_grasp=_param(params, "hold_active_tube_until_grasp", tube_config_cls),
-            ik_max_iters=_param(params, "ik_max_iters", tube_config_cls),
-            ik_pos_tol=_param(params, "ik_pos_tol", tube_config_cls),
-            ik_rot_tol=_param(params, "ik_rot_tol", tube_config_cls),
-            ik_damping=_param(params, "ik_damping", tube_config_cls),
-        )
-    )
-
-
 def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
     params = request.params
+    robot = PipetteRobotConfig(
+        arm=_param(params, "arm", PipetteRobotConfig),
+        open_gripper=_param(params, "open_gripper", PipetteRobotConfig),
+        close_gripper=_param(params, "close_gripper", PipetteRobotConfig),
+    )
+    timing = PipetteTimingConfig(
+        settle_steps=_param(params, "settle_steps", PipetteTimingConfig),
+        free_settle_steps=_param(params, "free_settle_steps", PipetteTimingConfig),
+        steps_per_segment=_param(params, "steps_per_segment", PipetteTimingConfig),
+        close_steps=_param(params, "close_steps", PipetteTimingConfig),
+        hold_steps=_param(params, "hold_steps", PipetteTimingConfig),
+        grasp_hold_steps=_param(params, "grasp_hold_steps", PipetteTimingConfig),
+    )
+    grasp = PipetteHandleGraspConfig(
+        pregrasp_distance=_param(params, "pregrasp_distance", PipetteHandleGraspConfig),
+        handle_grasp_offset=_vec_param(params, "handle_grasp_offset", PipetteHandleGraspConfig),
+        handle_grasp_euler=_vec_param(params, "handle_grasp_euler", PipetteHandleGraspConfig),
+        grasp_to_gripper_offset=_vec_param(params, "grasp_to_gripper_offset", PipetteHandleGraspConfig),
+        grasp_to_gripper_euler=_vec_param(params, "grasp_to_gripper_euler", PipetteHandleGraspConfig),
+        middle_grasp_arm=_param(params, "middle_grasp_arm", PipetteHandleGraspConfig),
+        middle_pregrasp_distance=_param(params, "middle_pregrasp_distance", PipetteHandleGraspConfig),
+        middle_grasp_offset=_vec_param(params, "middle_grasp_offset", PipetteHandleGraspConfig),
+        middle_grasp_euler=_vec_param(params, "middle_grasp_euler", PipetteHandleGraspConfig),
+        middle_grasp_to_gripper_offset=_vec_param(
+            params,
+            "middle_grasp_to_gripper_offset",
+            PipetteHandleGraspConfig,
+        ),
+        middle_grasp_to_gripper_euler=_vec_param(
+            params,
+            "middle_grasp_to_gripper_euler",
+            PipetteHandleGraspConfig,
+        ),
+        first_retreat_after_handoff_offset=_vec_param(
+            params,
+            "first_retreat_after_handoff_offset",
+            PipetteHandleGraspConfig,
+        ),
+    )
+    pipette = PipetteModelConfig(
+        pipette_joint=_param(params, "pipette_joint", PipetteModelConfig),
+        pipette_body=_param(params, "pipette_body", PipetteModelConfig),
+        pipette_tip_site=_param(params, "pipette_tip_site", PipetteModelConfig),
+        parking_weld=_param(params, "parking_weld", PipetteModelConfig),
+    )
+    tips = PipetteTipTargetConfig(
+        tip_joint_prefix=_param(params, "tip_joint_prefix", PipetteTipTargetConfig),
+        tip_site_prefix=_param(params, "tip_site_prefix", PipetteTipTargetConfig),
+        tip_mount_site_suffix=_param(params, "tip_mount_site_suffix", PipetteTipTargetConfig),
+        tip_end_site_suffix=_param(params, "tip_end_site_suffix", PipetteTipTargetConfig),
+        tip_pose_servo_enabled=_param(params, "tip_pose_servo_enabled", PipetteTipTargetConfig),
+        tip_hover_height=_param(params, "tip_hover_height", PipetteTipTargetConfig),
+        tip_mount_offset=_vec_param(params, "tip_mount_offset", PipetteTipTargetConfig),
+        tip_mount_target_euler=_vec_param(params, "tip_mount_target_euler", PipetteTipTargetConfig),
+        vertical_quat=_quat_param(params, "vertical_quat", PipetteTipTargetConfig),
+    )
+    tube = PipetteTubeTargetConfig(
+        tube_joint=_param(params, "tube_joint", PipetteTubeTargetConfig),
+        tube_top_offset=_param(params, "tube_top_offset", PipetteTubeTargetConfig),
+        tube_hover_height=_param(params, "tube_hover_height", PipetteTubeTargetConfig),
+        tube_near_height=_param(params, "tube_near_height", PipetteTubeTargetConfig),
+        tube_target_offset=_vec_param(params, "tube_target_offset", PipetteTubeTargetConfig),
+    )
+    ik = IKConfig(
+        ik_max_iters=_param(params, "ik_max_iters", IKConfig),
+        ik_pos_tol=_param(params, "ik_pos_tol", IKConfig),
+        ik_rot_tol=_param(params, "ik_rot_tol", IKConfig),
+        ik_damping=_param(params, "ik_damping", IKConfig),
+    )
+    waypoint = WaypointSettleConfig(
+        waypoint_settle_steps=_param(params, "waypoint_settle_steps", WaypointSettleConfig),
+        waypoint_settle_pos_tol=_param(params, "waypoint_settle_pos_tol", WaypointSettleConfig),
+    )
+    visual_servo = VisualServoConfig(
+        visual_servo_enabled=_param(params, "visual_servo_enabled", VisualServoConfig),
+        visual_servo_max_iters=_param(params, "visual_servo_max_iters", VisualServoConfig),
+        visual_servo_steps=_param(params, "visual_servo_steps", VisualServoConfig),
+        visual_servo_pos_tol=_param(params, "visual_servo_pos_tol", VisualServoConfig),
+        visual_servo_rot_tol=_param(params, "visual_servo_rot_tol", VisualServoConfig),
+        visual_servo_gain=_param(params, "visual_servo_gain", VisualServoConfig),
+        visual_servo_integral_gain=_param(params, "visual_servo_integral_gain", VisualServoConfig),
+        visual_servo_max_correction=_param(params, "visual_servo_max_correction", VisualServoConfig),
+    )
     return PipetteGraspTask(
         PipetteGraspTaskConfig(
             env=_make_env(request),
@@ -149,55 +185,15 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
             seed=request.seed,
             cameras=request.cameras,
             with_images=request.with_images,
-            arm=_param(params, "arm", PipetteGraspTaskConfig),
-            open_gripper=_param(params, "open_gripper", PipetteGraspTaskConfig),
-            close_gripper=_param(params, "close_gripper", PipetteGraspTaskConfig),
-            settle_steps=_param(params, "settle_steps", PipetteGraspTaskConfig),
-            free_settle_steps=_param(params, "free_settle_steps", PipetteGraspTaskConfig),
-            steps_per_segment=_param(params, "steps_per_segment", PipetteGraspTaskConfig),
-            close_steps=_param(params, "close_steps", PipetteGraspTaskConfig),
-            hold_steps=_param(params, "hold_steps", PipetteGraspTaskConfig),
-            grasp_hold_steps=_param(params, "grasp_hold_steps", PipetteGraspTaskConfig),
-            pregrasp_distance=_param(params, "pregrasp_distance", PipetteGraspTaskConfig),
-            handle_grasp_offset=_vec_param(params, "handle_grasp_offset", PipetteGraspTaskConfig),
-            handle_grasp_euler=_vec_param(params, "handle_grasp_euler", PipetteGraspTaskConfig),
-            grasp_to_gripper_offset=_vec_param(params, "grasp_to_gripper_offset", PipetteGraspTaskConfig),
-            grasp_to_gripper_euler=_vec_param(params, "grasp_to_gripper_euler", PipetteGraspTaskConfig),
-            grasp_offset=_vec_param(params, "grasp_offset", PipetteGraspTaskConfig),
-            lift_offset=_vec_param(params, "lift_offset", PipetteGraspTaskConfig),
-            tool_roll=_param(params, "tool_roll", PipetteGraspTaskConfig),
-            pipette_joint=_param(params, "pipette_joint", PipetteGraspTaskConfig),
-            pipette_body=_param(params, "pipette_body", PipetteGraspTaskConfig),
-            pipette_tip_site=_param(params, "pipette_tip_site", PipetteGraspTaskConfig),
-            tip_joint_prefix=_param(params, "tip_joint_prefix", PipetteGraspTaskConfig),
-            tip_site_prefix=_param(params, "tip_site_prefix", PipetteGraspTaskConfig),
-            tip_mount_site_suffix=_param(params, "tip_mount_site_suffix", PipetteGraspTaskConfig),
-            tip_end_site_suffix=_param(params, "tip_end_site_suffix", PipetteGraspTaskConfig),
-            tip_pose_servo_enabled=_param(params, "tip_pose_servo_enabled", PipetteGraspTaskConfig),
-            tip_hover_height=_param(params, "tip_hover_height", PipetteGraspTaskConfig),
-            tip_mount_offset=_vec_param(params, "tip_mount_offset", PipetteGraspTaskConfig),
-            tip_mount_target_euler=_vec_param(params, "tip_mount_target_euler", PipetteGraspTaskConfig),
-            parking_weld=_param(params, "parking_weld", PipetteGraspTaskConfig),
-            vertical_quat=_quat_param(params, "vertical_quat", PipetteGraspTaskConfig),
-            tube_joint=_param(params, "tube_joint", PipetteGraspTaskConfig),
-            tube_top_offset=_param(params, "tube_top_offset", PipetteGraspTaskConfig),
-            tube_hover_height=_param(params, "tube_hover_height", PipetteGraspTaskConfig),
-            tube_near_height=_param(params, "tube_near_height", PipetteGraspTaskConfig),
-            tube_target_offset=_vec_param(params, "tube_target_offset", PipetteGraspTaskConfig),
-            ik_max_iters=_param(params, "ik_max_iters", PipetteGraspTaskConfig),
-            ik_pos_tol=_param(params, "ik_pos_tol", PipetteGraspTaskConfig),
-            ik_rot_tol=_param(params, "ik_rot_tol", PipetteGraspTaskConfig),
-            ik_damping=_param(params, "ik_damping", PipetteGraspTaskConfig),
-            waypoint_settle_steps=_param(params, "waypoint_settle_steps", PipetteGraspTaskConfig),
-            waypoint_settle_pos_tol=_param(params, "waypoint_settle_pos_tol", PipetteGraspTaskConfig),
-            visual_servo_enabled=_param(params, "visual_servo_enabled", PipetteGraspTaskConfig),
-            visual_servo_max_iters=_param(params, "visual_servo_max_iters", PipetteGraspTaskConfig),
-            visual_servo_steps=_param(params, "visual_servo_steps", PipetteGraspTaskConfig),
-            visual_servo_pos_tol=_param(params, "visual_servo_pos_tol", PipetteGraspTaskConfig),
-            visual_servo_rot_tol=_param(params, "visual_servo_rot_tol", PipetteGraspTaskConfig),
-            visual_servo_gain=_param(params, "visual_servo_gain", PipetteGraspTaskConfig),
-            visual_servo_integral_gain=_param(params, "visual_servo_integral_gain", PipetteGraspTaskConfig),
-            visual_servo_max_correction=_param(params, "visual_servo_max_correction", PipetteGraspTaskConfig),
+            robot=robot,
+            timing=timing,
+            grasp=grasp,
+            pipette=pipette,
+            tips=tips,
+            tube=tube,
+            ik=ik,
+            waypoint=waypoint,
+            visual_servo=visual_servo,
         )
     )
 
@@ -250,17 +246,6 @@ def _create_unscrew_task(request: TaskRequest) -> BimanualUnscrewTask:
     )
 
 
-def _summarize_tube_grasp(metadata: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "metadata_found": True,
-        "steps": metadata["steps"],
-        "slot_index": metadata["slot_index"],
-        "slot_name": metadata["slot_name"],
-        "ik_all_waypoints_solved": metadata["ik_all_waypoints_solved"],
-        "final_tube_pos": metadata["final_tube_pos"],
-    }
-
-
 def _summarize_pipette_grasp(metadata: dict[str, Any]) -> dict[str, Any]:
     return {
         "metadata_found": True,
@@ -293,7 +278,6 @@ def _summarize_unscrew(metadata: dict[str, Any]) -> dict[str, Any]:
 
 TASK_REGISTRY: dict[str, TaskSpec] = {
     "pipette_grasp": TaskSpec(factory=_create_pipette_grasp_task, summarize=_summarize_pipette_grasp),
-    "tube_grasp": TaskSpec(factory=_create_tube_grasp_task, summarize=_summarize_tube_grasp),
     "tube_then_cap_grasp": TaskSpec(factory=_create_unscrew_task, summarize=_summarize_unscrew),
 }
 
@@ -320,13 +304,20 @@ def task_names() -> tuple[str, ...]:
 __all__ = [
     "BimanualUnscrewTask",
     "BimanualUnscrewTaskConfig",
+    "IKConfig",
     "PipetteGraspTask",
     "PipetteGraspTaskConfig",
+    "PipetteHandleGraspConfig",
+    "PipetteModelConfig",
+    "PipetteRobotConfig",
+    "PipetteTimingConfig",
+    "PipetteTipTargetConfig",
+    "PipetteTubeTargetConfig",
     "TASK_REGISTRY",
     "TaskRequest",
     "TaskSpec",
-    "TubeGraspTask",
-    "TubeGraspTaskConfig",
+    "VisualServoConfig",
+    "WaypointSettleConfig",
     "create_task",
     "summarize_metadata",
     "task_names",

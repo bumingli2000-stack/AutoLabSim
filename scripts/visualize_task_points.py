@@ -26,10 +26,10 @@ from autolabsim.scene import (
 )
 from autolabsim.reset_config import apply_reset_config, load_reset_config
 from autolabsim.tasks.common import ARM_DEFAULTS, cap_body_from_tube_joint, random_reset_info
-from autolabsim.tasks.pipette_grasp import PipetteGraspTaskConfig
+from autolabsim.tasks.pipette_grasp import PipetteHandleGraspConfig, PipetteModelConfig, PipetteTipTargetConfig
 
 TASK_DEFAULTS = {
-    "tube_grasp": {
+    "tube_side_grasp": {
         "arm": "second",
         "approach_axis": None,
         "closing_axis": None,
@@ -328,7 +328,7 @@ def nearest_active_tip_site_frames(
     return best
 
 
-def plan_tube_grasp_points(
+def plan_tube_side_grasp_points(
     model: Any,
     data: Any,
     mujoco: Any,
@@ -452,7 +452,7 @@ def plan_tube_then_cap_grasp_points(
 
     tube_args = namespace_with(
         args,
-        task="tube_grasp",
+        task="tube_side_grasp",
         arm=tube_arm,
         approach_axis=args.tube_approach_axis,
         closing_axis=args.tube_closing_axis,
@@ -469,7 +469,7 @@ def plan_tube_then_cap_grasp_points(
         grasp_outward_offset=args.cap_grasp_outward_offset if args.cap_grasp_outward_offset is not None else args.grasp_outward_offset,
     )
 
-    tube_plan = plan_tube_grasp_points(model, data, mujoco, tube_args, active_joint, random_info)
+    tube_plan = plan_tube_side_grasp_points(model, data, mujoco, tube_args, active_joint, random_info)
     cap_body = args.cap_body or cap_body_from_tube_joint(active_joint)
     cap_start_pos = body_pos(model, data, mujoco, cap_body)
     tube_grasp_pos = np.asarray(tube_plan["poses"]["grasp"]["pos"], dtype=np.float64)
@@ -545,7 +545,7 @@ def plan_bimanual_unscrew_cap_points(
     )
     tube_args = namespace_with(
         args,
-        task="tube_grasp",
+        task="tube_side_grasp",
         arm=tube_arm,
         approach_axis=args.tube_approach_axis,
         closing_axis=args.tube_closing_axis,
@@ -579,8 +579,8 @@ def plan_bimanual_unscrew_cap_points(
     # screw_cap.py 里是瓶盖臂先抓盖并整体抬起管子，再由管身臂横向夹管。
     tube_start_pos = free_joint_pos(model, data, mujoco, active_joint)
     tube_lifted_pos = tube_start_pos + np.asarray(args.post_offset, dtype=np.float64)
-    tube_plan = plan_tube_grasp_points(model, data, mujoco, tube_args, active_joint, random_info)
-    lifted_tube_plan = plan_tube_grasp_points_at_pos(
+    tube_plan = plan_tube_side_grasp_points(model, data, mujoco, tube_args, active_joint, random_info)
+    lifted_tube_plan = plan_tube_side_grasp_points_at_pos(
         model,
         data,
         mujoco,
@@ -616,7 +616,7 @@ def plan_bimanual_unscrew_cap_points(
     }
 
 
-def plan_tube_grasp_points_at_pos(
+def plan_tube_side_grasp_points_at_pos(
     model: Any,
     data: Any,
     mujoco: Any,
@@ -830,7 +830,6 @@ def plan_pipette_grasp_points(
 
 PLANNERS: dict[str, Planner] = {
     "bimanual_unscrew_cap": plan_bimanual_unscrew_cap_points,
-    "tube_grasp": plan_tube_grasp_points,
     "cap_grasp": plan_cap_grasp_points,
     "tube_then_cap_grasp": plan_tube_then_cap_grasp_points,
     "pipette_grasp": plan_pipette_grasp_points,
@@ -853,7 +852,7 @@ def current_site_info(model: Any, data: Any, mujoco: Any, site_name: str) -> dic
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Visualize task keypoints for tube/cap manipulation.")
-    parser.add_argument("--task", choices=sorted(PLANNERS), default="tube_grasp", help="Keypoint planner to visualize.")
+    parser.add_argument("--task", choices=sorted(PLANNERS), default="tube_then_cap_grasp", help="Keypoint planner to visualize.")
     parser.add_argument("--model", default="model/scenes/scene_mujoco_fast_tubes.xml", help="MuJoCo XML model path.")
     parser.add_argument("--keyframe", default="home", help="Initial keyframe name. Use empty string to skip.")
     parser.add_argument("--reset-config", default="configs/reset_single_tube_random.json", help="Reset config JSON.")
@@ -867,10 +866,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pregrasp-distance", type=float, default=0.10, help="Distance before grasp along -approach axis.")
     parser.add_argument("--grasp-outward-offset", type=float, default=None, help="Move grasp point outward, opposite the approach axis. Defaults depend on --task.")
 
-    parser.add_argument("--grasp-height", type=float, default=0.08, help="[tube_grasp] Height above tube free-joint origin.")
-    parser.add_argument("--pinch-forward-offset", type=float, default=0.0, help="[tube_grasp] Move pinch target along approach axis.")
-    parser.add_argument("--lift-distance", type=float, default=0.10, help="[tube_grasp] Vertical lift distance if --lift-offset is none.")
-    parser.add_argument("--lift-offset", type=lambda value: parse_optional_vec3(value, "lift_offset"), default=[0.25, 0.0, 0.12], help="[tube_grasp] World XYZ offset from grasp to post point.")
+    parser.add_argument("--grasp-height", type=float, default=0.08, help="[tube_then_cap_grasp tube stage] Height above tube free-joint origin.")
+    parser.add_argument("--pinch-forward-offset", type=float, default=0.0, help="[tube_then_cap_grasp tube stage] Move pinch target along approach axis.")
+    parser.add_argument("--lift-distance", type=float, default=0.10, help="[tube_then_cap_grasp tube stage] Vertical lift distance if --lift-offset is none.")
+    parser.add_argument("--lift-offset", type=lambda value: parse_optional_vec3(value, "lift_offset"), default=[0.25, 0.0, 0.12], help="[tube_then_cap_grasp tube stage] World XYZ offset from grasp to post point.")
 
     parser.add_argument("--cap-body", default=None, help="[cap_grasp] Cap body name. Defaults to the cap attached to active tube.")
     parser.add_argument("--cap-offset", type=lambda value: parse_optional_vec3(value, "cap_offset"), default=[0.0, 0.0, 0.0], help="[cap_grasp] World XYZ offset from cap body center to grasp point.")
@@ -889,40 +888,43 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tube-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for tube grasp stage.")
     parser.add_argument("--cap-grasp-outward-offset", type=float, default=None, help="[tube_then_cap_grasp] Outward offset for cap grasp stage.")
 
-    parser.add_argument("--pipette-body", default="pippipette", help="[pipette_grasp] Pipette body used as the local grasp reference.")
-    parser.add_argument("--pipette-tip-site", default="piptip_site", help="[pipette_grasp] Pipette tip site to visualize.")
-    parser.add_argument("--tip-joint-prefix", default=PipetteGraspTaskConfig.tip_joint_prefix, help="[pipette_grasp] Prefix for visible tip free joints.")
-    parser.add_argument("--tip-site-prefix", default=PipetteGraspTaskConfig.tip_site_prefix, help="[pipette_grasp] Prefix added to attached tip sites.")
-    parser.add_argument("--tip-mount-site-suffix", default=PipetteGraspTaskConfig.tip_mount_site_suffix, help="[pipette_grasp] Suffix for tip mount interface site.")
-    parser.add_argument("--tip-end-site-suffix", default=PipetteGraspTaskConfig.tip_end_site_suffix, help="[pipette_grasp] Suffix for tip end site.")
+    pipette_defaults = PipetteModelConfig()
+    grasp_defaults = PipetteHandleGraspConfig()
+    tip_defaults = PipetteTipTargetConfig()
+    parser.add_argument("--pipette-body", default=pipette_defaults.pipette_body, help="[pipette_grasp] Pipette body used as the local grasp reference.")
+    parser.add_argument("--pipette-tip-site", default=pipette_defaults.pipette_tip_site, help="[pipette_grasp] Pipette tip site to visualize.")
+    parser.add_argument("--tip-joint-prefix", default=tip_defaults.tip_joint_prefix, help="[pipette_grasp] Prefix for visible tip free joints.")
+    parser.add_argument("--tip-site-prefix", default=tip_defaults.tip_site_prefix, help="[pipette_grasp] Prefix added to attached tip sites.")
+    parser.add_argument("--tip-mount-site-suffix", default=tip_defaults.tip_mount_site_suffix, help="[pipette_grasp] Suffix for tip mount interface site.")
+    parser.add_argument("--tip-end-site-suffix", default=tip_defaults.tip_end_site_suffix, help="[pipette_grasp] Suffix for tip end site.")
     parser.add_argument(
         "--handle-grasp-offset",
         type=lambda value: parse_vec3(value, "handle_grasp_offset"),
-        default=list(PipetteGraspTaskConfig.handle_grasp_offset),
+        default=list(grasp_defaults.handle_grasp_offset),
         help="[pipette_grasp] Body-local handle grasp offset.",
     )
     parser.add_argument(
         "--handle-grasp-euler",
         type=lambda value: parse_vec3(value, "handle_grasp_euler"),
-        default=list(PipetteGraspTaskConfig.handle_grasp_euler),
+        default=list(grasp_defaults.handle_grasp_euler),
         help="[pipette_grasp] Body-local grasp frame XYZ Euler angles in radians.",
     )
     parser.add_argument(
         "--grasp-to-gripper-offset",
         type=lambda value: parse_vec3(value, "grasp_to_gripper_offset"),
-        default=list(PipetteGraspTaskConfig.grasp_to_gripper_offset),
+        default=list(grasp_defaults.grasp_to_gripper_offset),
         help="[pipette_grasp] Grasp-frame-local gripper target offset.",
     )
     parser.add_argument(
         "--grasp-to-gripper-euler",
         type=lambda value: parse_vec3(value, "grasp_to_gripper_euler"),
-        default=list(PipetteGraspTaskConfig.grasp_to_gripper_euler),
+        default=list(grasp_defaults.grasp_to_gripper_euler),
         help="[pipette_grasp] Grasp-frame-local gripper XYZ Euler angles in radians.",
     )
     parser.add_argument(
         "--pipette-lift-offset",
         type=lambda value: parse_vec3(value, "pipette_lift_offset"),
-        default=list(PipetteGraspTaskConfig.lift_offset),
+        default=[0.0, 0.0, 0.0],
         help="[pipette_grasp] World XYZ offset from grasp to post point.",
     )
 

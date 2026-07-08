@@ -1,6 +1,6 @@
 # AutoLabSim
 
-AutoLabSim is a MuJoCo-based simulation project for laboratory manipulation tasks. The current codebase focuses on tube grasping, cap manipulation, and episode generation/export workflows.
+AutoLabSim is a MuJoCo-based simulation project for laboratory manipulation tasks. The current codebase focuses on cap manipulation, pipette manipulation, and episode generation/export workflows.
 
 ## Project Structure
 
@@ -31,10 +31,12 @@ This layer controls object placement and randomized initialization at the start 
 
 ### 4. Task Logic
 
-- `autolabsim/tasks/tube_grasp.py`
-  Single-arm tube grasp task.
 - `autolabsim/tasks/screw_cap.py`
   Dual-arm cap unscrewing task.
+- `autolabsim/tasks/pipette_grasp.py`
+  Pipette grasping and tip-mounting task.
+- `autolabsim/task_target.py`
+  Shared task target, frame reference, and gripper command definitions.
 - `autolabsim/screw.py`
   Shared screw/unscrew logic.
 - `autolabsim/tasks/__init__.py`
@@ -53,7 +55,7 @@ This layer controls object placement and randomized initialization at the start 
 
 ### 6. Data Recording and Scripts
 
-- `scripts/generate_tube_grasp_batch.py`
+- `scripts/generate_task_batch.py`
   Batch episode generation entry point.
 - `scripts/visualize_task_points.py`
   Visualize grasp, pre-grasp, and lift points.
@@ -112,7 +114,7 @@ python scripts/view_scene.py model/scenes/scene_mujoco_fast_tubes_pipette.xml \
 ### Generate Episodes with Images
 
 ```bash
-python scripts/generate_tube_grasp_batch.py \
+python scripts/generate_task_batch.py \
   --scene fast_tubes \
   --task tube_then_cap_grasp \
   --count 1 \

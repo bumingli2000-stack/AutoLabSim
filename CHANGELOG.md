@@ -2,6 +2,27 @@
 
 这个文件用于记录 AutoLabSim 每次阶段性修改的内容、原因和验证结果。后续同步到 GitHub 后，可以直接在仓库里查看完整演进记录。
 
+## 2026-07-08
+## 完成架构重构，核心路线已经从“任务类里手写坐标转换/IK/执行”改成：
+## 选择对象 -> 定义 TaskTarget -> TaskTargetPlanner 规划 -> TaskTargetExecutor 执行 -> 更新 attachment
+重构了整个文件的任务规划逻辑，新增TaskTarget类，该类主要用于描述用于规划路径的目标点，将目标点的各种位置、状态、操作等属性都封装在其中，并基于此类重构了规划、执行等接口。基于此类实现了对规划和操作任务的高度抽象，后续拓展到新任务场景时，只需要调整目标点的属性，其余接口变动较小。
+目前版本还未推广到其他任务，稳定性还有待测试                       --LCY
+
+pipette_grasp文件被分解为三个部分，autolabsim/tasks/pipette_targets.py用于设置各个规划点的属性，autolabsim/tasks/pipette_scene.py用于获取场景中任务相关物体的位姿，autolabsim/tasks/pipette_metadata.py用于记录实验结果，autolabsim/tasks/pipette_grasp.py用于执行规划操作
+
+修改文件
+[task_target.py](/autolabsim/task_target.py)：新增 PoseOffset、TaskTarget.target_offset、offset_local()、with_approach_offset()。
+[motion_context.py](/autolabsim/motion_context.py)：新增 PlanningContext、ExecutionContext、KinematicBinding、SiteAttachment 等类型。
+[planner.py](/autolabsim/planner.py)：新增通用 TaskTargetPlanner，支持一级/多级 attachment 链。
+[executor.py](/autolabsim/executor.py)：新增通用 TaskTargetExecutor，接管插值、夹爪时序、settle、visual servo、约束维持、误差记录。
+[pipette_grasp.py](/autolabsim/tasks/pipette_grasp.py)：迁移到 Planner/Executor，删除 pipette 任务内通用运动执行逻辑。
+[tasks/__init__.py](/autolabsim/tasks/__init__.py)：迁移 pipette 配置构造为嵌套配置。
+[tasks/cli.py](/autolabsim/tasks/cli.py)：删除无运行端接收者的 --grasp-offset、--tool-roll。
+[visualize_task_points.py](/scripts/visualize_task_points.py)：不再依赖已删除的 pipette lift_offset 配置。
+[__init__.py](/autolabsim/__init__.py)：导出新 motion/planner/executor 类型。
+[test_motion_architecture.py](/tests/test_motion_architecture.py)：新增 8 个纯 Python 架构测试。
+
+
 ## 2026-07-05
 
 ### 开始构建移液任务场景，物体位置已经调整好，但是当前还不能交互  --LCY
@@ -13,7 +34,7 @@
 ### 双臂旋拧离心管盖任务重构
 
 - 将双臂开盖任务的主要参数集中到 `autolabsim/tasks/screw_cap.py`，减少命令行参数和任务内部默认值之间的冲突。
-- 精简 `generate_tube_grasp_batch.py` 的 CLI，只保留场景、任务、采集数量、图像记录等采集入口参数。
+- 精简批量生成 CLI，只保留场景、任务、采集数量、图像记录等采集入口参数。
 - 完善任务流程：抓瓶盖、向上提起离心管、另一只机械臂横向夹住离心管、棘轮式旋拧瓶盖、放置瓶盖、放回离心管、双臂回初始位姿。
 - 恢复并明确瓶盖提起阶段，使用 `cap_post_offset` 控制抓住瓶盖后向上提起离心管的高度。
 - 新增 `return_home_after_task` 和 `return_home_steps`，任务结束后两个机械臂会回到 reset 后的初始姿态。
@@ -49,7 +70,7 @@
 ### 验证
 
 - 使用 `python -m py_compile` 检查了核心 Python 文件。
-- 使用 `scripts/generate_tube_grasp_batch.py --task tube_then_cap_grasp` 生成测试 episode。
+- 使用 `scripts/generate_task_batch.py --task tube_then_cap_grasp` 生成测试 episode。
 - 验证结果：完整任务可以完成，`released=True`，瓶盖成功旋拧释放，离心管可放回试管架，最后双臂回初始姿态。
 
 ### 后续注意

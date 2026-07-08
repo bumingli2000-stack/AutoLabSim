@@ -29,6 +29,15 @@ from ..scene import (
 )
 from ..screw import ScrewCapSystem
 from ..task import AutoLabTask, TaskConfig
+from ..task_target import (
+    FrameRef,
+    GripperCommand,
+    PlannedTaskTarget,
+    ResolvedTaskTarget,
+    TaskTarget,
+    TaskTargetResolver,
+    gripper_command_to_actuator,
+)
 from ..topp import Topp, ToppConfig
 from .common import (
     ARM_DEFAULTS,
@@ -165,7 +174,7 @@ class BimanualUnscrewTask(AutoLabTask):
             fixed_joint_states=initial_object_states,
             debug_site=str(self.cap_arm["gripper_site"]),
         )
-        cap_grasp_action = np.asarray(cap_grasp_item["action"]).copy()
+        cap_grasp_action = np.asarray(cap_grasp_item.action).copy()
         self._hold_action(
             recorder,
             cap_grasp_action,
@@ -173,8 +182,8 @@ class BimanualUnscrewTask(AutoLabTask):
             "cap_settle_at_lift_grasp",
             fixed_joint_states=initial_object_states,
         )
-        self._record_site_target_error("cap_settle_at_lift_grasp", str(self.cap_arm["gripper_site"]), cap_grasp_item["target_pos"])
-        close_cap = np.asarray(cap_grasp_item["action"]).copy()
+        self._record_site_target_error("cap_settle_at_lift_grasp", str(self.cap_arm["gripper_site"]), cap_grasp_item.ik_site_pos)
+        close_cap = np.asarray(cap_grasp_item.action).copy()
         close_cap[cap_gripper_id] = self.runtime.cap_close_gripper
         self._move_action(
             recorder,
@@ -183,18 +192,18 @@ class BimanualUnscrewTask(AutoLabTask):
             "cap_close_for_lift",
             fixed_joint_states=initial_object_states,
         )
-        self._record_site_target_error("cap_close_for_lift", str(self.cap_arm["gripper_site"]), cap_grasp_item["target_pos"])
+        self._record_site_target_error("cap_close_for_lift", str(self.cap_arm["gripper_site"]), cap_grasp_item.ik_site_pos)
 
         cap_lift_attachments = self._attachments_to_site(
             str(self.cap_arm["gripper_site"]),
             (active_cap_joint, active_joint),
         )
-        cap_lift_action = np.asarray((cap_lift_plan[-1] if cap_lift_plan else cap_grasp_item)["action"]).copy()
+        cap_lift_action = np.asarray((cap_lift_plan[-1] if cap_lift_plan else cap_grasp_item).action).copy()
         cap_lift_action[cap_gripper_id] = self.runtime.cap_close_gripper
         if cap_lift_plan:
             for item in cap_lift_plan:
-                item["action"] = np.asarray(item["action"]).copy()
-                item["action"][cap_gripper_id] = self.runtime.cap_close_gripper
+                item.action = np.asarray(item.action).copy()
+                item.action[cap_gripper_id] = self.runtime.cap_close_gripper
             self._execute_plan(
                 recorder,
                 cap_lift_plan,
@@ -234,7 +243,7 @@ class BimanualUnscrewTask(AutoLabTask):
             follow_attachments=cap_lift_attachments,
             debug_site=str(self.tube_arm["gripper_site"]),
         )
-        tube_grasp_action = np.asarray(tube_grasp_item["action"]).copy()
+        tube_grasp_action = np.asarray(tube_grasp_item.action).copy()
         self._hold_action(
             recorder,
             tube_grasp_action,
@@ -242,8 +251,8 @@ class BimanualUnscrewTask(AutoLabTask):
             "tube_settle_at_side_grasp",
             follow_attachments=cap_lift_attachments,
         )
-        self._record_site_target_error("tube_settle_at_side_grasp", str(self.tube_arm["gripper_site"]), tube_grasp_item["target_pos"])
-        close_tube = np.asarray(tube_grasp_item["action"]).copy()
+        self._record_site_target_error("tube_settle_at_side_grasp", str(self.tube_arm["gripper_site"]), tube_grasp_item.ik_site_pos)
+        close_tube = np.asarray(tube_grasp_item.action).copy()
         close_tube[tube_gripper_id] = self.runtime.tube_close_gripper
         self._move_action(
             recorder,
@@ -252,7 +261,7 @@ class BimanualUnscrewTask(AutoLabTask):
             "tube_close_side_grip",
             follow_attachments=cap_lift_attachments,
         )
-        self._record_site_target_error("tube_close_side_grip", str(self.tube_arm["gripper_site"]), tube_grasp_item["target_pos"])
+        self._record_site_target_error("tube_close_side_grip", str(self.tube_arm["gripper_site"]), tube_grasp_item.ik_site_pos)
 
         tube_grip_attachment = self._attachments_to_site(str(self.tube_arm["gripper_site"]), (active_joint,))
         held_tube_state = capture_free_joint_state(self.env.model, self.env.data, self.env.mujoco, active_joint)
@@ -260,7 +269,7 @@ class BimanualUnscrewTask(AutoLabTask):
         self.screw_system.engage(self.env)
         cap_site_pos, _ = site_pose(self.env.model, self.env.data, self.env.mujoco, str(self.cap_arm["gripper_site"]))
         unscrew_start_action = np.asarray(self.env.data.ctrl, dtype=np.float64).copy()
-        unscrew_plan = self._plan_unscrew({"pos": cap_site_pos}, unscrew_start_action)
+        unscrew_plan = self._plan_unscrew(cap_site_pos, unscrew_start_action)
         self._execute_plan(recorder, unscrew_plan, "cap_unscrew", hold_joint=active_joint, held_state=held_tube_state)
         if self.screw_system is not None:
             self.screw_system.start_follow_after_release(self.env)
@@ -282,7 +291,7 @@ class BimanualUnscrewTask(AutoLabTask):
         if self.screw_system is not None:
             self.screw_system.release_follow()
         placed_cap_state = capture_free_joint_state(self.env.model, self.env.data, self.env.mujoco, active_cap_joint)
-        open_cap = np.asarray(cap_place_plan[-1]["action"]).copy()
+        open_cap = np.asarray(cap_place_plan[-1].action).copy()
         open_cap[cap_gripper_id] = self.runtime.open_gripper
         self._move_action(
             recorder,
@@ -318,7 +327,7 @@ class BimanualUnscrewTask(AutoLabTask):
             )
             if slot_quat is not None:
                 set_free_joint_pose(self.env.model, self.env.data, self.env.mujoco, active_joint, slot_pos, slot_quat)
-            open_tube = np.asarray(return_plan[-1]["action"]).copy()
+            open_tube = np.asarray(return_plan[-1].action).copy()
             open_tube[tube_gripper_id] = self.runtime.open_gripper
             self._move_action(
                 recorder,
@@ -367,7 +376,7 @@ class BimanualUnscrewTask(AutoLabTask):
         self.save_episode(self.runtime.out_dir, metadata, arrays)
         return metadata
 
-    def _make_tube_waypoints(self, tube_pos: np.ndarray) -> list[dict[str, Any]]:
+    def _make_tube_waypoints(self, tube_pos: np.ndarray) -> list[TaskTarget]:
         approach = unit(self.tube_arm["approach_axis"], "tube_approach_axis")
         closing = unit(self.tube_arm["closing_axis"], "tube_closing_axis")
         quat = gripper_quat_from_axes(self.env.mujoco, approach, closing, self.runtime.tube_tool_roll)
@@ -380,12 +389,12 @@ class BimanualUnscrewTask(AutoLabTask):
         pregrasp_pos = grasp_pos - approach * self.runtime.tube_pregrasp_distance
         lift_pos = grasp_pos + np.asarray(self.runtime.tube_lift_offset, dtype=np.float64)
         return [
-            {"name": "tube_pregrasp", "pos": pregrasp_pos, "quat": quat},
-            {"name": "tube_grasp", "pos": grasp_pos, "quat": quat},
-            {"name": "tube_lift", "pos": lift_pos, "quat": quat},
+            self._world_gripper_target("tube_pregrasp", pregrasp_pos, quat, self.runtime.tube_arm, self.runtime.open_gripper),
+            self._world_gripper_target("tube_grasp", grasp_pos, quat, self.runtime.tube_arm, self.runtime.open_gripper),
+            self._world_gripper_target("tube_lift", lift_pos, quat, self.runtime.tube_arm, self.runtime.tube_close_gripper),
         ]
 
-    def _make_cap_waypoints(self, cap_pos: np.ndarray) -> list[dict[str, Any]]:
+    def _make_cap_waypoints(self, cap_pos: np.ndarray) -> list[TaskTarget]:
         approach = unit(np.asarray(self.runtime.cap_approach_axis, dtype=np.float64), "cap_approach_axis")
         closing = unit(self.cap_arm["closing_axis"], "cap_closing_axis")
         quat = gripper_quat_from_axes(self.env.mujoco, approach, closing, self.runtime.cap_tool_roll)
@@ -393,12 +402,12 @@ class BimanualUnscrewTask(AutoLabTask):
         pregrasp_pos = grasp_pos - approach * self.runtime.cap_pregrasp_distance
         post_pos = grasp_pos + np.asarray(self.runtime.cap_post_offset, dtype=np.float64)
         return [
-            {"name": "cap_pregrasp", "pos": pregrasp_pos, "quat": quat},
-            {"name": "cap_grasp", "pos": grasp_pos, "quat": quat},
-            {"name": "cap_post", "pos": post_pos, "quat": quat},
+            self._world_gripper_target("cap_pregrasp", pregrasp_pos, quat, self.runtime.cap_arm, self.runtime.open_gripper),
+            self._world_gripper_target("cap_grasp", grasp_pos, quat, self.runtime.cap_arm, self.runtime.open_gripper),
+            self._world_gripper_target("cap_post", post_pos, quat, self.runtime.cap_arm, self.runtime.cap_close_gripper),
         ]
 
-    def _make_cap_place_waypoints(self, current_cap_grasp_pos: np.ndarray) -> list[dict[str, Any]]:
+    def _make_cap_place_waypoints(self, current_cap_grasp_pos: np.ndarray) -> list[TaskTarget]:
         approach = unit(np.asarray(self.runtime.cap_approach_axis, dtype=np.float64), "cap_place_approach_axis")
         closing = unit(self.cap_arm["closing_axis"], "cap_place_closing_axis")
         quat = gripper_quat_from_axes(self.env.mujoco, approach, closing, self.runtime.cap_tool_roll)
@@ -406,19 +415,52 @@ class BimanualUnscrewTask(AutoLabTask):
         preplace_pos = place_pos + np.asarray([0.0, 0.0, self.runtime.cap_place_lift], dtype=np.float64)
         clear_pos = np.asarray(current_cap_grasp_pos, dtype=np.float64) + np.asarray([0.0, 0.0, self.runtime.cap_clearance_lift], dtype=np.float64)
         return [
-            {"name": "cap_clearance_lift", "pos": clear_pos, "quat": quat},
-            {"name": "cap_preplace", "pos": preplace_pos, "quat": quat},
-            {"name": "cap_place", "pos": place_pos, "quat": quat},
+            self._world_gripper_target("cap_clearance_lift", clear_pos, quat, self.runtime.cap_arm, self.runtime.cap_close_gripper),
+            self._world_gripper_target("cap_preplace", preplace_pos, quat, self.runtime.cap_arm, self.runtime.cap_close_gripper),
+            self._world_gripper_target("cap_place", place_pos, quat, self.runtime.cap_arm, self.runtime.cap_close_gripper),
         ]
 
-    def _make_tube_return_waypoints(self, slot_pos: np.ndarray) -> list[dict[str, Any]]:
-        return_pos = self._make_tube_waypoints(np.asarray(slot_pos, dtype=np.float64))[1]["pos"]
+    def _make_tube_return_waypoints(self, slot_pos: np.ndarray) -> list[TaskTarget]:
+        return_pos = np.asarray(self._make_tube_waypoints(np.asarray(slot_pos, dtype=np.float64))[1].pos, dtype=np.float64)
         _, current_quat = site_pose(self.env.model, self.env.data, self.env.mujoco, str(self.tube_arm["gripper_site"]))
         preplace_pos = return_pos + np.asarray([0.0, 0.0, 0.10], dtype=np.float64)
         return [
-            {"name": "tube_return_preplace", "pos": preplace_pos, "quat": current_quat},
-            {"name": "tube_return_place", "pos": return_pos, "quat": current_quat},
+            self._world_gripper_target(
+                "tube_return_preplace",
+                preplace_pos,
+                current_quat,
+                self.runtime.tube_arm,
+                self.runtime.tube_close_gripper,
+            ),
+            self._world_gripper_target(
+                "tube_return_place",
+                return_pos,
+                current_quat,
+                self.runtime.tube_arm,
+                self.runtime.tube_close_gripper,
+            ),
         ]
+
+    def _world_gripper_target(
+        self,
+        name: str,
+        pos: np.ndarray,
+        quat: np.ndarray,
+        arm_name: str,
+        gripper_value: float,
+        *,
+        servo_mode: str = "position",
+    ) -> TaskTarget:
+        return TaskTarget(
+            name=name,
+            parent=FrameRef("world"),
+            pos=tuple(np.asarray(pos, dtype=np.float64).tolist()),
+            quat_wxyz=tuple(normalize_quat(np.asarray(quat, dtype=np.float64)).tolist()),
+            arm=arm_name,
+            controlled_site=str(ARM_DEFAULTS[arm_name]["gripper_site"]),
+            servo_mode=servo_mode,
+            gripper=GripperCommand(float(gripper_value), timing="during", steps=self.runtime.close_steps),
+        )
 
     def _attachments_to_site(self, site_name: str, joint_names: tuple[str, ...]) -> list[tuple[str, str, dict[str, np.ndarray]]]:
         return [
@@ -468,14 +510,15 @@ class BimanualUnscrewTask(AutoLabTask):
         self,
         start_pos: np.ndarray,
         start_quat: np.ndarray,
-        waypoints: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
-        dense: list[dict[str, Any]] = []
+        waypoints: list[TaskTarget],
+    ) -> list[TaskTarget]:
+        dense: list[TaskTarget] = []
         current_pos = np.asarray(start_pos, dtype=np.float64)
         current_quat = normalize_quat(start_quat)
         for index, waypoint in enumerate(waypoints):
-            target_pos = np.asarray(waypoint["pos"], dtype=np.float64)
-            target_quat = normalize_quat(waypoint["quat"])
+            resolved = self._resolve_task_target(waypoint)
+            target_pos = np.asarray(resolved.pos, dtype=np.float64)
+            target_quat = normalize_quat(resolved.quat)
             distance = float(np.linalg.norm(target_pos - current_pos))
             quat_delta = 1.0 - abs(float(np.dot(current_quat, target_quat)))
             if distance < 1e-8 and quat_delta < 1e-8:
@@ -487,13 +530,18 @@ class BimanualUnscrewTask(AutoLabTask):
                 )
             for step in range(1, steps + 1):
                 alpha = step / steps
-                name = str(waypoint["name"]) if step == steps else f"{waypoint['name']}_cart_{step:02d}"
+                name = waypoint.name if step == steps else f"{waypoint.name}_cart_{step:02d}"
                 dense.append(
-                    {
-                        "name": name,
-                        "pos": (1.0 - alpha) * current_pos + alpha * target_pos,
-                        "quat": self._quat_slerp(current_quat, target_quat, alpha),
-                    }
+                    TaskTarget(
+                        name=name,
+                        parent=FrameRef("world"),
+                        pos=tuple(((1.0 - alpha) * current_pos + alpha * target_pos).tolist()),
+                        quat_wxyz=tuple(self._quat_slerp(current_quat, target_quat, alpha).tolist()),
+                        arm=waypoint.arm,
+                        controlled_site=waypoint.controlled_site,
+                        servo_mode=waypoint.servo_mode,
+                        gripper=waypoint.gripper,
+                    )
                 )
             current_pos = target_pos
             current_quat = target_quat
@@ -502,8 +550,8 @@ class BimanualUnscrewTask(AutoLabTask):
     def _densify_waypoints_from_current_site(
         self,
         arm: dict[str, Any],
-        waypoints: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+        waypoints: list[TaskTarget],
+    ) -> list[TaskTarget]:
         start_pos, start_quat = site_pose(
             self.env.model,
             self.env.data,
@@ -513,13 +561,55 @@ class BimanualUnscrewTask(AutoLabTask):
         return self._densify_cartesian_waypoints(start_pos, start_quat, waypoints)
 
     @staticmethod
-    def _plan_index(plan: list[dict[str, Any]], waypoint_name: str) -> int:
+    def _plan_index(plan: list[PlannedTaskTarget], waypoint_name: str) -> int:
         for index, item in enumerate(plan):
-            if item.get("name") == waypoint_name:
+            if item.name == waypoint_name:
                 return index
         raise ValueError(f"Planned waypoint not found: {waypoint_name}")
 
-    def _plan_arm(self, arm: dict[str, Any], waypoints: list[dict[str, Any]], gripper_value: float) -> list[dict[str, Any]]:
+    def _resolve_task_target(self, target: TaskTarget) -> ResolvedTaskTarget:
+        return TaskTargetResolver(self.env.model, self.env.data, self.env.mujoco).resolve(target)
+
+    def _target_gripper_value(self, target: TaskTarget) -> float | None:
+        if target.gripper is None:
+            return None
+        return gripper_command_to_actuator(target.gripper, self.runtime.open_gripper, self.runtime.close_gripper)
+
+    def _target_to_ik_target(self, arm: dict[str, Any], target: TaskTarget) -> tuple[ResolvedTaskTarget, np.ndarray, np.ndarray]:
+        gripper_site = str(arm["gripper_site"])
+        controlled_site = target.controlled_site or gripper_site
+        if controlled_site != gripper_site:
+            raise ValueError(f"Unsupported controlled site for {target.name}: {controlled_site}")
+        resolved = self._resolve_task_target(target)
+        return resolved, resolved.pos, resolved.quat
+
+    def _manual_action_item_from_target(
+        self,
+        target: TaskTarget,
+        action: np.ndarray,
+        *,
+        steps: int | None = None,
+        twist_angle: float | None = None,
+    ) -> PlannedTaskTarget:
+        resolved, ik_pos, ik_quat = self._target_to_ik_target(ARM_DEFAULTS[target.arm], target)
+        gripper_value = self._target_gripper_value(target)
+        return PlannedTaskTarget(
+            target=target,
+            resolved=resolved,
+            ik_site_pos=np.asarray(ik_pos, dtype=np.float64),
+            ik_site_quat=np.asarray(ik_quat, dtype=np.float64),
+            action=np.asarray(action, dtype=np.float64),
+            ik_success=True,
+            ik_pos_error=0.0,
+            ik_rot_error=0.0,
+            arm_joint_names=tuple(str(name) for name in ARM_DEFAULTS[target.arm]["joint_names"]),
+            arm_qpos=np.zeros(0, dtype=np.float64),
+            gripper_value=gripper_value,
+            steps=steps,
+            twist_angle=twist_angle,
+        )
+
+    def _plan_arm(self, arm: dict[str, Any], waypoints: list[TaskTarget], gripper_value: float) -> list[PlannedTaskTarget]:
         joint_names = tuple(arm["joint_names"])
         qpos_ids = joint_qpos_ids(self.env.model, self.env.mujoco, joint_names)
         arm_actuator_ids = [actuator_id(self.env.model, self.env.mujoco, name) for name in joint_names]
@@ -528,16 +618,17 @@ class BimanualUnscrewTask(AutoLabTask):
         start_qpos = self.env.data.qpos.copy()
         start_qvel = self.env.data.qvel.copy()
         start_ctrl = self.env.data.ctrl.copy()
-        plan: list[dict[str, Any]] = []
-        for waypoint in waypoints:
+        plan: list[PlannedTaskTarget] = []
+        for target in waypoints:
+            resolved, ik_pos, ik_quat = self._target_to_ik_target(arm, target)
             result = solve_site_ik(
                 self.env.model,
                 self.env.data,
                 self.env.mujoco,
                 str(arm["gripper_site"]),
                 joint_names,
-                waypoint["pos"],
-                waypoint["quat"],
+                ik_pos,
+                ik_quat,
                 max_iters=self.runtime.ik_max_iters,
                 pos_tol=self.runtime.ik_pos_tol,
                 rot_tol=self.runtime.ik_rot_tol,
@@ -546,19 +637,22 @@ class BimanualUnscrewTask(AutoLabTask):
             action = start_ctrl.copy()
             for action_id, qpos_id in zip(arm_actuator_ids, qpos_ids, strict=True):
                 action[action_id] = result.qpos[qpos_id]
-            action[gripper_id] = gripper_value
+            target_gripper_value = self._target_gripper_value(target)
+            action[gripper_id] = float(target_gripper_value if target_gripper_value is not None else gripper_value)
             plan.append(
-                {
-                    "name": waypoint["name"],
-                    "target_pos": waypoint["pos"].tolist(),
-                    "target_quat_wxyz": waypoint["quat"].tolist(),
-                    "action": action,
-                    "ik_success": result.success,
-                    "ik_pos_error": result.pos_error,
-                    "ik_rot_error": result.rot_error,
-                    "arm_joint_names": list(joint_names),
-                    "arm_qpos": result.qpos[qpos_ids].tolist(),
-                }
+                PlannedTaskTarget(
+                    target=target,
+                    resolved=resolved,
+                    ik_site_pos=np.asarray(ik_pos, dtype=np.float64),
+                    ik_site_quat=np.asarray(ik_quat, dtype=np.float64),
+                    action=action,
+                    ik_success=bool(result.success),
+                    ik_pos_error=float(result.pos_error),
+                    ik_rot_error=float(result.rot_error),
+                    arm_joint_names=tuple(str(name) for name in joint_names),
+                    arm_qpos=np.asarray(result.qpos[qpos_ids], dtype=np.float64),
+                    gripper_value=target_gripper_value,
+                )
             )
         self.env.data.qpos[:] = start_qpos
         self.env.data.qvel[:] = start_qvel
@@ -566,14 +660,14 @@ class BimanualUnscrewTask(AutoLabTask):
         self.env.mujoco.mj_forward(self.env.model, self.env.data)
         return plan
 
-    def _plan_unscrew(self, grasp_waypoint: dict[str, Any], start_action: np.ndarray) -> list[dict[str, Any]]:
+    def _plan_unscrew(self, grasp_pos: np.ndarray, start_action: np.ndarray) -> list[PlannedTaskTarget]:
         approach = unit(np.asarray(self.runtime.cap_approach_axis, dtype=np.float64), "cap_unscrew_axis")
         closing = unit(self.cap_arm["closing_axis"], "cap_closing_axis")
-        pos = np.asarray(grasp_waypoint["pos"], dtype=np.float64)
+        pos = np.asarray(grasp_pos, dtype=np.float64)
         gripper_id = actuator_id(self.env.model, self.env.mujoco, str(self.cap_arm["gripper_actuator"]))
         ratchet_angle = max(1e-6, float(self.runtime.ratchet_angle))
         loops = max(1, int(np.ceil(self.runtime.release_angle / ratchet_angle)))
-        plan: list[dict[str, Any]] = []
+        plan: list[PlannedTaskTarget] = []
         current_action = np.asarray(start_action, dtype=np.float64).copy()
         accumulated_twist = 0.0
 
@@ -595,20 +689,21 @@ class BimanualUnscrewTask(AutoLabTask):
                 closing,
                 self.runtime.cap_tool_roll - segment_angle,
             )
+            rotate_target = self._world_gripper_target(
+                f"cap_ratchet_twist_{loop_id:02d}",
+                target_pos,
+                rotate_quat,
+                self.runtime.cap_arm,
+                self.runtime.cap_close_gripper,
+            )
             rotate_plan = self._plan_arm(
                 self.cap_arm,
-                [
-                    {
-                        "name": f"cap_ratchet_twist_{loop_id:02d}",
-                        "pos": target_pos,
-                        "quat": normalize_quat(rotate_quat),
-                    }
-                ],
+                [rotate_target],
                 self.runtime.cap_close_gripper,
             )[0]
-            rotate_plan["twist_angle"] = float(twist_angle)
+            rotate_plan.twist_angle = float(twist_angle)
             plan.append(rotate_plan)
-            current_action = np.asarray(rotate_plan["action"], dtype=np.float64).copy()
+            current_action = np.asarray(rotate_plan.action, dtype=np.float64).copy()
             accumulated_twist = twist_angle
 
             if twist_angle >= self.runtime.release_angle - 1e-9:
@@ -616,49 +711,54 @@ class BimanualUnscrewTask(AutoLabTask):
 
             open_action = current_action.copy()
             open_action[gripper_id] = self.runtime.open_gripper
+            open_target = self._world_gripper_target(
+                f"cap_ratchet_open_{loop_id:02d}",
+                target_pos,
+                rotate_quat,
+                self.runtime.cap_arm,
+                self.runtime.open_gripper,
+            )
             plan.append(
-                {
-                    "name": f"cap_ratchet_open_{loop_id:02d}",
-                    "target_pos": target_pos.tolist(),
-                    "target_quat_wxyz": rotate_quat.tolist(),
-                    "action": open_action,
-                    "ik_success": True,
-                    "ik_pos_error": 0.0,
-                    "ik_rot_error": 0.0,
-                    "twist_angle": float(twist_angle),
-                    "steps": self.runtime.close_steps,
-                }
+                self._manual_action_item_from_target(
+                    open_target,
+                    open_action,
+                    steps=self.runtime.close_steps,
+                    twist_angle=float(twist_angle),
+                )
             )
 
             rewind_quat = gripper_quat_from_axes(self.env.mujoco, approach, closing, self.runtime.cap_tool_roll)
+            rewind_target = self._world_gripper_target(
+                f"cap_ratchet_rewind_{loop_id:02d}",
+                target_pos,
+                rewind_quat,
+                self.runtime.cap_arm,
+                self.runtime.open_gripper,
+            )
             rewind_plan = self._plan_arm(
                 self.cap_arm,
-                [
-                    {
-                        "name": f"cap_ratchet_rewind_{loop_id:02d}",
-                        "pos": target_pos,
-                        "quat": normalize_quat(rewind_quat),
-                    }
-                ],
+                [rewind_target],
                 self.runtime.open_gripper,
             )[0]
-            rewind_plan["twist_angle"] = float(twist_angle)
+            rewind_plan.twist_angle = float(twist_angle)
             plan.append(rewind_plan)
 
-            close_action = np.asarray(rewind_plan["action"], dtype=np.float64).copy()
+            close_action = np.asarray(rewind_plan.action, dtype=np.float64).copy()
             close_action[gripper_id] = self.runtime.cap_close_gripper
+            regrip_target = self._world_gripper_target(
+                f"cap_ratchet_regrip_{loop_id:02d}",
+                target_pos,
+                rewind_quat,
+                self.runtime.cap_arm,
+                self.runtime.cap_close_gripper,
+            )
             plan.append(
-                {
-                    "name": f"cap_ratchet_regrip_{loop_id:02d}",
-                    "target_pos": target_pos.tolist(),
-                    "target_quat_wxyz": rewind_quat.tolist(),
-                    "action": close_action,
-                    "ik_success": True,
-                    "ik_pos_error": 0.0,
-                    "ik_rot_error": 0.0,
-                    "twist_angle": float(twist_angle),
-                    "steps": self.runtime.close_steps,
-                }
+                self._manual_action_item_from_target(
+                    regrip_target,
+                    close_action,
+                    steps=self.runtime.close_steps,
+                    twist_angle=float(twist_angle),
+                )
             )
             current_action = close_action
         return plan
@@ -666,7 +766,7 @@ class BimanualUnscrewTask(AutoLabTask):
     def _execute_plan(
         self,
         recorder: EpisodeRecorder,
-        plan: list[dict[str, Any]],
+        plan: list[PlannedTaskTarget],
         phase_prefix: str,
         *,
         hold_joint: str | None = None,
@@ -678,8 +778,9 @@ class BimanualUnscrewTask(AutoLabTask):
         can_use_topp = (
             self.runtime.use_topp
             and len(plan) >= 2
-            and all("arm_joint_names" in item and "arm_qpos" in item for item in plan)
-            and all("steps" not in item for item in plan)
+            and all(item.arm_qpos.size > 0 for item in plan)
+            and all(item.steps is None for item in plan)
+            and all(item.gripper_command is None or item.gripper_command.timing == "during" for item in plan)
         )
         if can_use_topp:
             self._execute_topp_plan(
@@ -695,37 +796,96 @@ class BimanualUnscrewTask(AutoLabTask):
             return
 
         for item in plan:
-            phase = f"{phase_prefix}:{item['name']}"
+            phase = f"{phase_prefix}:{item.name}"
+            self._apply_target_gripper_command(
+                recorder,
+                item,
+                "before",
+                f"{phase}:gripper_before",
+                hold_joint=hold_joint,
+                held_state=held_state,
+                follow_attachments=follow_attachments,
+                fixed_joint_states=fixed_joint_states,
+            )
             self._move_action(
                 recorder,
-                np.asarray(item["action"]),
-                int(item.get("steps", self.runtime.steps_per_segment)),
+                np.asarray(item.action),
+                int(item.steps if item.steps is not None else self.runtime.steps_per_segment),
                 phase,
                 hold_joint=hold_joint,
                 held_state=held_state,
                 follow_attachments=follow_attachments,
                 fixed_joint_states=fixed_joint_states,
-                twist_target=item.get("twist_angle"),
+                twist_target=item.twist_angle,
             )
-            if debug_site is not None and "target_pos" in item:
+            if debug_site is not None and item.servo_mode != "none" and item.debug_target_pos is not None:
                 self._settle_until_site_reached(
                     recorder,
-                    np.asarray(item["action"]),
+                    np.asarray(item.action),
                     phase,
                     debug_site,
-                    item["target_pos"],
+                    item.debug_target_pos,
                     hold_joint=hold_joint,
                     held_state=held_state,
                     follow_attachments=follow_attachments,
                     fixed_joint_states=fixed_joint_states,
-                    twist_target=item.get("twist_angle"),
+                    twist_target=item.twist_angle,
                 )
-                self._record_site_target_error(phase, debug_site, item["target_pos"])
+                self._record_site_target_error(phase, debug_site, item.debug_target_pos)
+            self._apply_target_gripper_command(
+                recorder,
+                item,
+                "after",
+                f"{phase}:gripper_after",
+                hold_joint=hold_joint,
+                held_state=held_state,
+                follow_attachments=follow_attachments,
+                fixed_joint_states=fixed_joint_states,
+            )
+
+    def _apply_target_gripper_command(
+        self,
+        recorder: EpisodeRecorder,
+        item: PlannedTaskTarget,
+        timing: str,
+        phase: str,
+        *,
+        hold_joint: str | None = None,
+        held_state: tuple[np.ndarray, np.ndarray] | None = None,
+        follow_attachments: list[tuple[str, str, dict[str, np.ndarray]]] | None = None,
+        fixed_joint_states: list[tuple[str, tuple[np.ndarray, np.ndarray]]] | None = None,
+    ) -> None:
+        command = item.gripper_command
+        if command is None or command.timing != timing:
+            return
+        gripper_value = item.gripper_value
+        if gripper_value is None:
+            gripper_value = gripper_command_to_actuator(
+                command,
+                self.runtime.open_gripper,
+                self.runtime.close_gripper,
+            )
+        arm = ARM_DEFAULTS[str(item.target.arm)]
+        gripper_id = actuator_id(self.env.model, self.env.mujoco, str(arm["gripper_actuator"]))
+        action = np.asarray(self.env.data.ctrl if timing == "before" else item.action, dtype=np.float64).copy()
+        action[gripper_id] = float(gripper_value)
+        self._move_action(
+            recorder,
+            action,
+            int(command.steps),
+            phase,
+            hold_joint=hold_joint,
+            held_state=held_state,
+            follow_attachments=follow_attachments,
+            fixed_joint_states=fixed_joint_states,
+            twist_target=item.twist_angle,
+        )
+        item.action = action
 
     def _execute_topp_plan(
         self,
         recorder: EpisodeRecorder,
-        plan: list[dict[str, Any]],
+        plan: list[PlannedTaskTarget],
         phase_prefix: str,
         *,
         hold_joint: str | None = None,
@@ -734,11 +894,11 @@ class BimanualUnscrewTask(AutoLabTask):
         fixed_joint_states: list[tuple[str, tuple[np.ndarray, np.ndarray]]] | None = None,
         debug_site: str | None = None,
     ) -> None:
-        joint_names = tuple(str(name) for name in plan[0]["arm_joint_names"])
+        joint_names = tuple(str(name) for name in plan[0].arm_joint_names)
         qpos_ids = joint_qpos_ids(self.env.model, self.env.mujoco, joint_names)
         action_ids = [actuator_id(self.env.model, self.env.mujoco, joint_name) for joint_name in joint_names]
         start_q = np.asarray([self.env.data.qpos[qpos_id] for qpos_id in qpos_ids], dtype=np.float64)
-        q_waypoints = np.vstack([start_q, *(np.asarray(item["arm_qpos"], dtype=np.float64) for item in plan)])
+        q_waypoints = np.vstack([start_q, *(np.asarray(item.arm_qpos, dtype=np.float64) for item in plan)])
 
         planner = Topp(ToppConfig(dof=len(joint_names), qc_vel=self.runtime.topp_vel, qc_acc=self.runtime.topp_acc))
         trajectory = planner.jnt_traj(q_waypoints)
@@ -751,10 +911,10 @@ class BimanualUnscrewTask(AutoLabTask):
             q = planner.query(trajectory, t)
             item_index = int(np.searchsorted(segment_edges[1:], t, side="left"))
             item_index = min(item_index, len(plan) - 1)
-            action = np.asarray(plan[item_index]["action"], dtype=np.float64).copy()
+            action = np.asarray(plan[item_index].action, dtype=np.float64).copy()
             for action_id, value in zip(action_ids, q, strict=True):
                 action[action_id] = value
-            phase = f"{phase_prefix}:{plan[item_index]['name']}"
+            phase = f"{phase_prefix}:{plan[item_index].name}"
             obs, *_ = self.manager.step(action)
             constrained = False
             if hold_joint is not None and held_state is not None:
@@ -774,21 +934,25 @@ class BimanualUnscrewTask(AutoLabTask):
             recorder.record(obs, action, phase)
 
         final_item = plan[-1]
-        if debug_site is not None and "target_pos" in final_item:
-            phase = f"{phase_prefix}:{final_item['name']}"
+        if (
+            debug_site is not None
+            and final_item.servo_mode != "none"
+            and final_item.debug_target_pos is not None
+        ):
+            phase = f"{phase_prefix}:{final_item.name}"
             self._settle_until_site_reached(
                 recorder,
-                np.asarray(final_item["action"]),
+                np.asarray(final_item.action),
                 phase,
                 debug_site,
-                final_item["target_pos"],
+                final_item.debug_target_pos,
                 hold_joint=hold_joint,
                 held_state=held_state,
                 follow_attachments=follow_attachments,
                 fixed_joint_states=fixed_joint_states,
-                twist_target=final_item.get("twist_angle"),
+                twist_target=final_item.twist_angle,
             )
-            self._record_site_target_error(phase, debug_site, final_item["target_pos"])
+            self._record_site_target_error(phase, debug_site, final_item.debug_target_pos)
 
     def _settle_until_site_reached(
         self,
@@ -936,9 +1100,9 @@ class BimanualUnscrewTask(AutoLabTask):
         active_joint: str,
         active_cap_joint: str,
         active_cap_body: str,
-        tube_plan: list[dict[str, Any]],
-        cap_plan: list[dict[str, Any]],
-        unscrew_plan: list[dict[str, Any]],
+        tube_plan: list[PlannedTaskTarget],
+        cap_plan: list[PlannedTaskTarget],
+        unscrew_plan: list[PlannedTaskTarget],
         *,
         num_steps: int,
     ) -> dict[str, Any]:
@@ -960,9 +1124,9 @@ class BimanualUnscrewTask(AutoLabTask):
             "slot_index": random_info.get("slot_index") if random_info else None,
             "slot_name": random_info.get("slot_name") if random_info else None,
             "reset_info": reset_info,
-            "tube_waypoints": [{k: v for k, v in item.items() if k != "action"} for item in tube_plan],
-            "cap_waypoints": [{k: v for k, v in item.items() if k != "action"} for item in cap_plan],
-            "unscrew_waypoints": [{k: v for k, v in item.items() if k != "action"} for item in unscrew_plan],
+            "tube_waypoints": [item.to_metadata() for item in tube_plan],
+            "cap_waypoints": [item.to_metadata() for item in cap_plan],
+            "unscrew_waypoints": [item.to_metadata() for item in unscrew_plan],
             "execution_site_errors": json_safe(self.execution_site_errors),
             "screw_progress": {
                 "released": bool(self.screw_system.progress.released if self.screw_system else False),

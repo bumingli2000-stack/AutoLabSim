@@ -26,13 +26,17 @@ def build_batch_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--task",
         choices=task_names(),
-        default="tube_grasp",
+        default="tube_then_cap_grasp",
         help="Task sequence to generate.",
     )
     parser.add_argument("--count", type=int, default=5, help="Number of episodes to generate when --seeds is not set.")
     parser.add_argument("--seed-start", type=int, default=0, help="First seed when generating a contiguous seed range.")
     parser.add_argument("--seeds", default=None, help="Comma-separated seed list, for example: 0,1,2,3,4.")
-    parser.add_argument("--out-root", default="data/episodes/tube_grasp_batch", help="Directory containing generated episodes and manifest.json.")
+    parser.add_argument(
+        "--out-root",
+        default="data/episodes/tube_then_cap_grasp_batch",
+        help="Directory containing generated episodes and manifest.json.",
+    )
     parser.add_argument("--model", default=None, help="MuJoCo XML model path. Overrides the selected scene profile.")
     parser.add_argument("--reset-config", default=None, help="Reset config JSON. Overrides the selected scene profile.")
     parser.add_argument("--active-joint", default="centrifuge_50ml_screw_joint_1", help="Fallback tube free joint if reset info is absent.")
@@ -52,13 +56,18 @@ def build_batch_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hold-steps", type=int, default=None, help="Final hold steps for supported tasks.")
     parser.add_argument("--grasp-hold-steps", type=int, default=None, help="Hold steps before closing gripper for supported tasks.")
     parser.add_argument("--pregrasp-distance", type=float, default=None, help="Pregrasp offset distance for supported tasks.")
-    parser.add_argument("--grasp-offset", default=None, help="Object-relative grasp offset as 'x y z' for supported tasks.")
     parser.add_argument("--handle-grasp-offset", default=None, help="Pipette-body-local handle grasp offset as 'x y z'.")
     parser.add_argument("--handle-grasp-euler", default=None, help="Pipette-body-local grasp frame XYZ Euler angles in radians.")
     parser.add_argument("--grasp-to-gripper-offset", default=None, help="Grasp-frame-local gripper target offset as 'x y z'.")
     parser.add_argument("--grasp-to-gripper-euler", default=None, help="Grasp-frame-local gripper XYZ Euler angles in radians.")
     parser.add_argument("--lift-offset", default=None, help="Object lift offset as 'x y z' for supported tasks.")
-    parser.add_argument("--tool-roll", type=float, default=None, help="Tool roll angle in radians for supported tasks.")
+    parser.add_argument("--middle-grasp-arm", default=None, help="Arm used to grasp the pipette middle during handoff.")
+    parser.add_argument("--middle-pregrasp-distance", type=float, default=None, help="Pregrasp offset distance for the pipette middle grasp.")
+    parser.add_argument("--middle-grasp-offset", default=None, help="Pipette-body-local middle grasp offset as 'x y z'.")
+    parser.add_argument("--middle-grasp-euler", default=None, help="Pipette-body-local middle grasp frame XYZ Euler angles in radians.")
+    parser.add_argument("--middle-grasp-to-gripper-offset", default=None, help="Middle-grasp-frame-local gripper target offset as 'x y z'.")
+    parser.add_argument("--middle-grasp-to-gripper-euler", default=None, help="Middle-grasp-frame-local gripper XYZ Euler angles in radians.")
+    parser.add_argument("--first-retreat-after-handoff-offset", default=None, help="World offset for the first gripper after second-arm handoff as 'x y z'.")
     parser.add_argument("--pipette-joint", default=None, help="Pipette free joint name for pipette_grasp.")
     parser.add_argument("--pipette-body", default=None, help="Pipette body name used as grasp reference for pipette_grasp.")
     parser.add_argument("--pipette-tip-site", default=None, help="Pipette tip site name used for tip-hover targeting.")
