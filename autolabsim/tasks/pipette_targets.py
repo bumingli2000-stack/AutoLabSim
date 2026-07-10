@@ -97,10 +97,24 @@ class TipHoverTargets:
     targets: tuple[TaskTarget, ...]
     aligned_joint_quat: np.ndarray
 
-
+'''负责构造：
+    抓取目标；
+    预抓取目标；
+    枪头 hover 目标；
+    装枪头目标；
+    离心管 hover/near 目标。
+'''
 class PipetteTargetBuilder:
-    """Construct task-space targets for all pipette workflow stages."""
+    """构造移液枪任务中的 TaskTarget。
 
+        该对象带有少量任务状态：
+
+        - tip_hover_targets() 会选择并缓存当前目标枪头；
+        - tube_hover_targets()/tube_near_targets() 会缓存当前离心管目标；
+        - 后续装枪头和 metadata 生成依赖这些缓存信息。
+
+        因此，一个 episode 应使用同一个 PipetteTargetBuilder 实例。
+    """
     def __init__(
         self,
         env: Any,
@@ -131,7 +145,36 @@ class PipetteTargetBuilder:
         self.tip_target_info: dict[str, Any] | None = None
         self.tube_target_info: dict[str, Any] | None = None
 
+    '''
+    构造抓取目标, 预抓取目标, 以及抓取后撤退目标
+    1. primary_grasp_targets: 构造 pipette 抓取目标和预抓取目标
+    2. middle_grasp_targets: 构造 pipette 中间抓取目标和预抓取目标
+    3. first_retreat_after_handoff_targets: 构造 pipette 抓取后撤退目标
+    4. tip_hover_targets: 构造 pipette tip hover 目标
+    5. tip_mount_down_targets: 构造 pipette tip 装载目标
+    6. tip_retract_targets: 构造 pipette tip 撤退目标
+    7. tube_hover_targets: 构造离心管 hover 目标
+    8. tube_near_targets: 构造离心管 near 目标
+    9. target_tip_info: 获取当前的 tip 目标信息
+    10. target_tip_joint: 获取当前的 tip 关节名称
+    11. gripper_site: 获取指定机械臂的 gripper site
+    12. _tube_approach_targets: 构造离心管 hover 和 near 目标
+    13. _tip_mount_target_pose: 计算 tip 装载目标的世界坐标和四元数
+    14. _tip_mount_task_target: 构造 tip 装载任务目标
+    15. _open_during: 构造 gripper 打开命令
+    16. _closed_during: 构造 gripper 关闭命令       
+    '''
     def primary_grasp_targets(self) -> list[TaskTarget]:
+        """构造 first 机械臂抓取移液枪手柄的目标序列。
+
+            位姿链：
+                pipette body
+                → handle grasp frame
+                → first gripper site
+
+            如果 pregrasp_distance > 0，则先生成沿夹爪局部
+            approach 轴后退的预抓取点，再生成最终抓取点。
+        """
         gripper_site = self.gripper_site(self.primary_arm)
         grasp_target = TaskTarget(
             name="pipette_grasp",
@@ -223,6 +266,17 @@ class PipetteTargetBuilder:
         ]
 
     def tip_hover_targets(self, arm_name: str) -> TipHoverTargets:
+        """构造移液枪移动到枪头上方的两阶段目标。
+
+            阶段一：
+                保持当前枪头姿态，只平移到目标枪头上方。
+
+            阶段二：
+                保持位置不变，将 pipette_tip_site 的姿态调整为
+                枪头 mount site 的目标姿态。
+
+            这样可以避免机械臂在长距离移动过程中同时进行大角度旋转。
+        """
         aligned_joint_quat = normalize_quat(
             np.asarray(self.tips.vertical_quat, dtype=np.float64)
         )

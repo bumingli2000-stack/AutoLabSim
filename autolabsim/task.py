@@ -24,6 +24,7 @@ class AutoLabTask:
 
     def __init__(self, config: TaskConfig, systems: list[System] | None = None):
         self.config = config
+        # 初始化环境，传入环境配置
         self.env = AutoLabMuJoCoEnv(config.env)
         self.manager = Manager(self.env, systems or [])
         self.task_info: dict[str, Any] = {}

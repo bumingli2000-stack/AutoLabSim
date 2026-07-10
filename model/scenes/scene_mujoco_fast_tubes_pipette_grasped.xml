@@ -1,0 +1,527 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="150L_Incubator_PipetteGrasped">
+  <compiler angle="radian" autolimits="true" />
+  <size memory="256M" />
+  <option integrator="implicitfast" timestep="0.001" />
+  <default>
+    <default class="robot">
+      <default class="motor">
+        <joint />
+        <motor />
+      </default>
+      <default class="visua">
+        <geom material="visual_geom" contype="0" conaffinity="0" group="0" />
+      </default>
+      <default class="colli">
+        <geom material="collision_material" condim="3" contype="0" conaffinity="1" priority="1" group="0" solref="0.005 1" solimp="0.99 0.999 1e-05" friction="1 0.01 0.01" />
+      </default>
+    </default>
+    <default class="ur5e">
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom type="capsule" group="3" />
+        <default class="eef_collision">
+          <geom type="cylinder" />
+        </default>
+      </default>
+      <joint axis="0 1 0" range="-6.28319 6.28319" />
+      <default class="joint_limited">
+        <joint range="-3.1415 3.1415" />
+      </default>
+      <default class="position">
+        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-260 260" />
+        <default class="position_limited">
+          <position ctrlrange="-3.1415 3.1415" />
+        </default>
+        <default class="position_small">
+          <position kp="800" kv="55" forcerange="-70 70" />
+        </default>
+      </default>
+    </default>
+  </default>
+  <default>
+    <default class="ur5e1">
+      <default class="visual1">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision1">
+        <geom type="capsule" group="3" />
+        <default class="eef_collision1">
+          <geom type="cylinder" />
+        </default>
+      </default>
+      <joint axis="0 1 0" range="-6.28319 6.28319" />
+      <default class="joint_limited1">
+        <joint range="-3.1415 3.1415" />
+      </default>
+      <default class="position1">
+        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-260 260" />
+        <default class="position_limited1">
+          <position ctrlrange="-3.1415 3.1415" />
+        </default>
+        <default class="position_small1">
+          <position kp="800" kv="55" forcerange="-70 70" />
+        </default>
+      </default>
+    </default>
+  </default>
+  <default>
+    <geom friction="0.2 0.08 0.08" />
+    <default class="vention">
+      <geom conaffinity="0" contype="0" group="1" />
+      <default class="vention_collision">
+        <geom conaffinity="1" condim="3" contype="0" group="3" margin="0.001" rgba=".4 .5 .6 1" />
+      </default>
+    </default>
+  </default>
+  <compiler angle="radian" />
+  <option gravity="0 0 -9.81" />
+  <option integrator="implicitfast" impratio="1" cone="elliptic" noslip_iterations="2" />
+  <asset>
+    <material name="black" rgba="0.033 0.033 0.033 1" />
+    <material name="jointgray" rgba="0.278 0.278 0.278 1" />
+    <material name="linkgray" rgba="0.82 0.82 0.82 1" />
+    <material name="urblue" rgba="0.49 0.678 0.8 1" />
+    <mesh file="../../assets/robot/ur5e/base_0.obj" />
+    <mesh file="../../assets/robot/ur5e/base_1.obj" />
+    <mesh file="../../assets/robot/ur5e/shoulder_0.obj" />
+    <mesh file="../../assets/robot/ur5e/shoulder_1.obj" />
+    <mesh file="../../assets/robot/ur5e/shoulder_2.obj" />
+    <mesh file="../../assets/robot/ur5e/upperarm_0.obj" />
+    <mesh file="../../assets/robot/ur5e/upperarm_1.obj" />
+    <mesh file="../../assets/robot/ur5e/upperarm_2.obj" />
+    <mesh file="../../assets/robot/ur5e/upperarm_3.obj" />
+    <mesh file="../../assets/robot/ur5e/forearm_0.obj" />
+    <mesh file="../../assets/robot/ur5e/forearm_1.obj" />
+    <mesh file="../../assets/robot/ur5e/forearm_2.obj" />
+    <mesh file="../../assets/robot/ur5e/forearm_3.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist1_0.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist1_1.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist1_2.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist2_0.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist2_1.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist2_2.obj" />
+    <mesh file="../../assets/robot/ur5e/wrist3.obj" />
+    <model name="2f85" file="../robot/2f85.xml" content_type="text/xml" />
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <material name="collision_material" rgba="1 1 1 1" />
+    <material name="visual_geom" rgba="1 1 1 1" />
+    <material name="pump_visual" rgba="0.6 0.8 1 1" />
+    <material name="pump_collision" rgba="0.6 0.8 1 0.5" />
+    <material name="ground_mat" texture="grid" texrepeat="4 4" texuniform="true" reflectance="0.2" />
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.3 0.3 0.3" rgb2="0.5 0.5 0.5" width="512" height="512" mark="edge" markrgb="0.6 0.6 0.6" />
+    <mesh name="base_link.STL" file="../../assets/incubator/base_link.STL" />
+    <mesh name="Link_1.STL" file="../../assets/incubator/Link_1.STL" />
+    <mesh name="tablebase" file="../../assets/workbench/tablebase.STL" />
+    <mesh name="tabletop" file="../../assets/workbench/tabletop.STL" />
+    <mesh name="tableleft" file="../../assets/workbench/tableleft.STL" />
+    <mesh name="tablemid" file="../../assets/workbench/tablemid.STL" />
+    <mesh name="tableright" file="../../assets/workbench/tableright.STL" />
+    <mesh name="air_pump" file="../../assets/tool/Electronic_pipette/ADP-10mLAirDisplacementPump.STL" scale="0.0005 0.0005 0.0005" />
+    <mesh name="plater" file="../../assets/container/pcr_plate_96well_vis/pcr_plate_96well_vis.obj" scale="0.0025 0.0025 0.0025" />
+    <mesh name="Microscope" file="../../assets/instrument/Microscope/Microscope.STL" scale="1.8 1.8 1.8" />
+    <mesh name="incumid" file="../../assets/incubator/incumid.STL" scale="0.001 0.001 0.001" />
+    <mesh name="incutop" file="../../assets/incubator/incutop.STL" scale="0.001 0.001 0.001" />
+    <mesh name="incubase" file="../../assets/incubator/incubase.STL" scale="0.001 0.001 0.001" />
+    <mesh name="incuright" file="../../assets/incubator/incuright.STL" scale="0.001 0.001 0.001" />
+    <mesh name="incuup" file="../../assets/incubator/incuup.STL" scale="0.001 0.001 0.001" />
+    <mesh name="incudown" file="../../assets/incubator/incudown.STL" scale="0.001 0.001 0.001" />
+    <material name="vention_black" rgba="0.05 0.05 0.1 1" reflectance="0" shininess=".5" />
+    <material name="vention_white" rgba="0.4 0.4 0.4 1" reflectance="0." shininess=".1" />
+    <material name="vention_blue" rgba=".14 .30 .52 1" reflectance="10" shininess=".1" />
+    <mesh name="centrifuge_1500ul_no_lid-visual_visual" file="../../assets/container/centrifuge_1500ul_no_lid_vis/visual.obj" scale="0.002 0.002 0.002" />
+    <material name="centrifuge_1500ul_no_lid" rgba="1 1 1 0.2" />
+    <mesh name="centrifuge_plate_60well_vis" file="../../assets/rack/centrifuge_plate_60well_vis/centrifuge_plate_60well_vis.obj" scale="0.0015 0.0015 0.0015" />
+    <mesh name="centrifuge_50ml_vis" file="../../assets/container/centrifuge_50ml_vis/centrifuge_50ml_vis.obj" scale="0.001 0.001 0.001" />
+    <mesh name="centrifuge_10ml_vis" file="../../assets/container/centrifuge_10ml_vis/centrifuge_10ml_vis.obj" scale="0.001 0.001 0.001" />
+    <mesh name="centrifuge_50ml_screw_body-visual" file="../../assets/container/centrifuge_50ml_vis/centrifuge_tube_50ml_body.STL" scale="0.001 0.001 0.001" />
+    <mesh name="centrifuge_50ml_screw_cap-visual" file="../../assets/container/centrifuge_50ml_vis/centrifuge_tube_50ml_cap.STL" scale="0.001 0.001 0.001" />
+    <material name="centrifuge_50ml_screw_body" rgba="1 1 1 0.2" />
+    <material name="centrifuge_50ml_screw_cap" rgba="0.9294 0.2706 0.0627 1" />
+    <model name="centrifuge_10slot_autobio" file="../rack/centrifuge_10slot.gen.xml" content_type="text/xml" />
+    <model name="pipette" file="../tool/pipette_no_tip.gen.xml" content_type="text/xml" />
+    <model name="tip_box" file="../tool/tip_box.gen.xml" content_type="text/xml" />
+    <model name="pipette_tip" file="../tool/pipette_tip_1p5.gen.xml" content_type="text/xml" />
+    <model name="pipette_rack" file="../tool/pipette_rack.gen.xml" content_type="text/xml" />
+  </asset>
+  <visual>
+    <global azimuth="220" elevation="0" />
+  </visual>
+  <worldbody>
+    <camera name="overview_camera" mode="fixed" pos="0 -3.75 1.35" xyaxes="1 -0 0 0 0.707107 0.707107" fovy="53" />
+
+    <body name="base" pos="0.41 -3.3 0.4" quat="1 0 0 1" childclass="ur5e">
+      <inertial mass="4" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
+      <geom mesh="base_0" material="black" class="visual" contype="0" conaffinity="0" />
+      <geom mesh="base_1" material="jointgray" class="visual" contype="0" conaffinity="0" />
+      <body name="shoulder_link" pos="0 0 0.163" gravcomp="1">
+        <inertial mass="3.7" pos="0 0 0" diaginertia="0.0102675 0.0102675 0.00666" />
+        <joint name="shoulder_pan" axis="0 0 1" />
+        <geom mesh="shoulder_0" material="urblue" class="visual" contype="0" conaffinity="0" />
+        <geom mesh="shoulder_1" material="black" class="visual" contype="0" conaffinity="0" />
+        <geom mesh="shoulder_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+        <geom class="collision" size="0.06 0.06" pos="0 0 -0.04" />
+        <body name="upper_arm_link" pos="0 0.138 0" quat="1 0 1 0" gravcomp="1">
+          <inertial mass="8.393" pos="0 0 0.2125" diaginertia="0.133886 0.133886 0.0151074" />
+          <joint name="shoulder_lift" />
+          <geom mesh="upperarm_0" material="linkgray" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_1" material="black" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_3" material="urblue" class="visual" contype="0" conaffinity="0" />
+          <geom class="collision" pos="0 -0.04 0" quat="1 1 0 0" size="0.06 0.06" />
+          <geom class="collision" size="0.05 0.2" pos="0 0 0.2" />
+          <body name="forearm_link" pos="0 -0.131 0.425" gravcomp="1">
+            <inertial mass="2.275" pos="0 0 0.196" diaginertia="0.0311796 0.0311796 0.004095" />
+            <joint name="elbow" class="joint_limited" />
+            <geom mesh="forearm_0" material="urblue" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_1" material="linkgray" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_2" material="black" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_3" material="jointgray" class="visual" contype="0" conaffinity="0" />
+            <geom class="collision" pos="0 0.08 0" quat="1 1 0 0" size="0.055 0.06" />
+            <geom class="collision" size="0.038 0.19" pos="0 0 0.2" />
+            <body name="wrist_1_link" pos="0 0 0.392" quat="1 0 1 0" gravcomp="1">
+              <inertial mass="1.219" pos="0 0.127 0" diaginertia="0.0025599 0.0025599 0.0021942" />
+              <joint name="wrist_1" />
+              <geom mesh="wrist1_0" material="black" class="visual" contype="0" conaffinity="0" />
+              <geom mesh="wrist1_1" material="urblue" class="visual" contype="0" conaffinity="0" />
+              <geom mesh="wrist1_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+              <geom class="collision" pos="0 0.05 0" quat="1 1 0 0" size="0.04 0.07" />
+              <body name="wrist_2_link" pos="0 0.127 0" gravcomp="1">
+                <inertial mass="1.219" pos="0 0 0.1" diaginertia="0.0025599 0.0025599 0.0021942" />
+                <joint name="wrist_2" axis="0 0 1" />
+                <geom mesh="wrist2_0" material="black" class="visual" contype="0" conaffinity="0" />
+                <geom mesh="wrist2_1" material="urblue" class="visual" contype="0" conaffinity="0" />
+                <geom mesh="wrist2_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+                <geom class="collision" size="0.04 0.06" pos="0 0 0.04" />
+                <geom class="collision" pos="0 0.02 0.1" quat="1 1 0 0" size="0.04 0.04" />
+                <body name="wrist_3_link" pos="0 0 0.1" gravcomp="1">
+                  <inertial mass="0.1879" pos="0 0.0771683 0" quat="1 0 0 1" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
+                  <joint name="wrist_3" />
+                  <geom material="linkgray" mesh="wrist3" class="visual" contype="0" conaffinity="0" />
+                  <geom class="eef_collision" pos="0 0.08 0" quat="1 1 0 0" size="0.04 0.02" />
+                  <site name="attachment_site" size="0.01" pos="0 0.1 0" quat="-1 1 1 1" rgba="1 0 0 1" group="1" />
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
+                    <camera name="wrist_cam" pos="0 0.0924748 0.04" quat="0 0 0.988 0.156" mode="fixed" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                  </frame>
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
+                    <attach model="2f85" prefix="2f85:" />
+                  </frame>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <body name="base1" pos="-0.41 -2.75 0.4" quat="1 0 0 1" childclass="ur5e">
+      <inertial mass="4" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
+      <geom mesh="base_0" material="black" class="visual" contype="0" conaffinity="0" />
+      <geom mesh="base_1" material="jointgray" class="visual" contype="0" conaffinity="0" />
+      <body name="shoulder_link1" pos="0 0 0.163" gravcomp="1">
+        <inertial mass="3.7" pos="0 0 0" diaginertia="0.0102675 0.0102675 0.00666" />
+        <joint name="ur5e1_shoulder_pan" axis="0 0 1" />
+        <geom mesh="shoulder_0" material="urblue" class="visual" contype="0" conaffinity="0" />
+        <geom mesh="shoulder_1" material="black" class="visual" contype="0" conaffinity="0" />
+        <geom mesh="shoulder_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+        <geom class="collision" size="0.06 0.06" pos="0 0 -0.04" />
+        <body name="upper_arm_link1" pos="0 0.138 0" quat="1 0 1 0" gravcomp="1">
+          <inertial mass="8.393" pos="0 0 0.2125" diaginertia="0.133886 0.133886 0.0151074" />
+          <joint name="ur5e1_shoulder_lift" />
+          <geom mesh="upperarm_0" material="linkgray" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_1" material="black" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+          <geom mesh="upperarm_3" material="urblue" class="visual" contype="0" conaffinity="0" />
+          <geom class="collision" pos="0 -0.04 0" quat="1 1 0 0" size="0.06 0.06" />
+          <geom class="collision" size="0.05 0.2" pos="0 0 0.2" />
+          <body name="forearm_link1" pos="0 -0.131 0.425" gravcomp="1">
+            <inertial mass="2.275" pos="0 0 0.196" diaginertia="0.0311796 0.0311796 0.004095" />
+            <joint name="ur5e1_elbow" class="joint_limited" />
+            <geom mesh="forearm_0" material="urblue" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_1" material="linkgray" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_2" material="black" class="visual" contype="0" conaffinity="0" />
+            <geom mesh="forearm_3" material="jointgray" class="visual" contype="0" conaffinity="0" />
+            <geom class="collision" pos="0 0.08 0" quat="1 1 0 0" size="0.055 0.06" />
+            <geom class="collision" size="0.038 0.19" pos="0 0 0.2" />
+            <body name="wrist_1_link1" pos="0 0 0.392" quat="1 0 1 0" gravcomp="1">
+              <inertial mass="1.219" pos="0 0.127 0" diaginertia="0.0025599 0.0025599 0.0021942" />
+              <joint name="ur5e1_wrist_1" />
+              <geom mesh="wrist1_0" material="black" class="visual" contype="0" conaffinity="0" />
+              <geom mesh="wrist1_1" material="urblue" class="visual" contype="0" conaffinity="0" />
+              <geom mesh="wrist1_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+              <geom class="collision" pos="0 0.05 0" quat="1 1 0 0" size="0.04 0.07" />
+              <body name="wrist_2_link1" pos="0 0.127 0" gravcomp="1">
+                <inertial mass="1.219" pos="0 0 0.1" diaginertia="0.0025599 0.0025599 0.0021942" />
+                <joint name="ur5e1_wrist_2" axis="0 0 1" />
+                <geom mesh="wrist2_0" material="black" class="visual" contype="0" conaffinity="0" />
+                <geom mesh="wrist2_1" material="urblue" class="visual" contype="0" conaffinity="0" />
+                <geom mesh="wrist2_2" material="jointgray" class="visual" contype="0" conaffinity="0" />
+                <geom class="collision" size="0.04 0.06" pos="0 0 0.04" />
+                <geom class="collision" pos="0 0.02 0.1" quat="1 1 0 0" size="0.04 0.04" />
+                <body name="wrist_3_link1" pos="0 0 0.1" gravcomp="1">
+                  <inertial mass="0.1879" pos="0 0.0771683 0" quat="1 0 0 1" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
+                  <joint name="ur5e1_wrist_3" />
+                  <geom material="linkgray" mesh="wrist3" class="visual" contype="0" conaffinity="0" />
+                  <geom class="eef_collision" pos="0 0.08 0" quat="1 1 0 0" size="0.04 0.02" />
+                  <site name="attachment_site1" size="0.01" pos="0 0.1 0" quat="-1 1 1 1" rgba="1 0 0 1" group="1" />
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
+                    <camera name="wrist_cam1" pos="0 0.0924748 0.04" quat="0 0 0.988 0.156" mode="fixed" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                  </frame>
+                  <frame pos="0 0.1 0" quat="0 0 0.707107 0.707107">
+                    <attach model="2f85" prefix="2f85_1" />
+                  </frame>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    
+    <geom name="ground" type="plane" pos="0 0 -0.43" size="10 10 0.1" material="ground_mat" group="0" />
+    <light name="main_light" pos="1 1 2" mode="trackcom" diffuse="0.8 0.8 0.8" specular="0.3 0.3 0.3" />
+    <light name="fill_light" directional="true" pos="-0.5 0.5 1.5" dir="0 0 -1" diffuse="0.5 0.5 0.6" />
+    <light name="warm_side" pos="0.5 -1 1" diffuse="0.6 0.5 0.4" />
+
+    <body name="base_link" pos="0.3 -0.315 -0.35" quat="1 1 0 0" childclass="robot">
+      <geom name="base_link_collision" pos="0 0 0" quat="1 0 0 0" type="mesh" mesh="base_link.STL" class="colli" group="0" contype="0" conaffinity="0" />
+      <geom name="base_link_visual" pos="0 0 0" quat="1 0 0 0" material="visual_geom" type="mesh" mesh="base_link.STL" class="visua" group="0" contype="0" conaffinity="0" />
+      <body name="Link_1" pos="-0.27 0.35 0.33" quat="1 0 0 0">
+        <joint name="joint0" type="hinge" ref="1.5708" class="motor" range="-1.5708 1.5708" axis="0 1 0" />
+        <inertial pos="0.4001 0.25319 -0.021084" quat="1 0 0 0" mass="16.224" diaginertia="0.3392 0.85408 1.1872" />
+        <geom name="Link_1_collision" pos="0 0 0" quat="1 0 0 0" type="mesh" mesh="Link_1.STL" class="colli" group="0" contype="0" conaffinity="0" />
+        <geom name="Link_1_visual" pos="0 0 0" quat="1 0 0 0" material="visual_geom" type="mesh" mesh="Link_1.STL" class="visua" group="0" contype="0" conaffinity="0" />
+      </body>
+      <site name="base_link_site" pos="0 0 1" quat="0 1 0 0" />
+      <camera name="front_camera" mode="track" fovy="90" quat="4.33e-17 4.33e-17 0.7071 0.7071" pos="0 2 0.5" />
+      <camera name="side_camera" mode="track" fovy="90" quat="-0.5 -0.5 0.5 0.5" pos="-2 0 0.5" />
+    </body>
+
+    <body name="tablebase" pos="-1 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tablebase" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tablebase" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tabletop" pos="-1 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tabletop" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tabletop" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tablemid" pos="-1.05 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tablemid" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tablemid" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tableleft" pos="-1.5 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tableleft" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tableleft" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tableright" pos="-1 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+
+    <body name="tablebase2" pos="-2 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tablebase" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tablebase" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tabletop2" pos="-2 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tabletop" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tabletop" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tablemid2" pos="-2.05 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tablemid" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tablemid" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tableleft2" pos="-2.5 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tableleft" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tableleft" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="tableright2" pos="-2 0.5 -0.43" euler="3.1416 -1.5708 1.5708">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+ 
+    <body name="centrifuge_10slot_rack" pos="0 -3 0.424" quat="1 0 0 0">
+      <attach model="centrifuge_10slot_autobio" body="centrifuge_10slot" prefix="rack/" />
+    </body>
+    <body name="centrifuge_plate_60well_vis" pos="-0.45 -3.25 0.41" euler="0 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="1 1 1" />
+      <geom type="mesh" mesh="centrifuge_plate_60well_vis" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="centrifuge_plate_60well_vis" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom name="centrifuge_plate_60well_support" type="box" size="0.12 0.08 0.018" pos="0 0 0.005" rgba="0.4 0.6 0.9 0.12" group="5" contype="1" conaffinity="1" />
+    </body>
+    <body name="Microscope" pos="-2.7 -0.3 0.36" euler="0 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="1 1 1" />
+      <geom type="mesh" mesh="Microscope" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="Microscope" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+
+    <body name="incumid" pos="0 0 -0.35" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incumid" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="incutop" pos="0 0 -0.35" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incutop" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="incuright" pos="0.3 -0.05 -0.35" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incuright" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="incubase" pos="0 0 -0.43" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incubase" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="incuup" pos="0.05 0 -0.36" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incuup" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+    <body name="incudown" pos="0.05 0 -0.36" euler="1.5708 0 0">
+      <inertial pos="0 0 0" mass="1" diaginertia="0.01 0.01 0.01" />
+      <geom type="mesh" mesh="incudown" rgba="1 1 1 1" group="0" contype="0" conaffinity="0" />
+    </body>
+  
+    <body name="vention table" childclass="vention">
+      <geom type="cylinder" size="0.040 0.010" pos="-.585 -3.383 -0.42" material="vention_black" />
+      <geom type="cylinder" size="0.040 0.010" pos="0.585 -3.383 -0.420" material="vention_black" />
+      <geom type="cylinder" size="0.040 0.010" pos="-.585 -2.617 -0.420" material="vention_black" />
+      <geom type="cylinder" size="0.040 0.010" pos="0.585 -2.617 -0.420" material="vention_black" />
+      <geom type="cylinder" size="0.010 0.020" pos="-.585 -3.383 -0.40" material="vention_black" />
+      <geom type="cylinder" size="0.010 0.020" pos="0.585 -3.383 -0.40" material="vention_black" />
+      <geom type="cylinder" size="0.010 0.020" pos="-.585 -2.617 -0.40" material="vention_black" />
+      <geom type="cylinder" size="0.010 0.020" pos="0.585 -2.617 -0.40" material="vention_black" />
+      <geom type="box" size="0.023 0.023 .387" pos="-.585 -3.383 0.005" material="vention_blue" />
+      <geom type="box" size="0.023 0.023 .387" pos="0.585 -3.383 0.005" material="vention_blue" />
+      <geom type="box" size="0.023 0.023 .387" pos="-.585 -2.617 0.005" material="vention_blue" />
+      <geom type="box" size="0.023 0.023 .387" pos="0.585 -2.617 0.005" material="vention_blue" />
+      <geom type="box" size="0.023 0.023 .337" pos="0 -2.623 0.010" material="vention_blue" />
+      <geom type="box" size="0.023 0.023 .337" pos="0 -3.377 0.010" material="vention_blue" />
+      <geom type="box" size="0.652 0.409 0.023" pos="0 -3 0.371" material="vention_white" />
+      <geom type="box" size="0.654 0.411 0.023" pos="0 -3 0.360" material="vention_blue" />
+      <geom type="box" size="0.602 0.399 0.005" pos="0 -3 -0.280" material="vention_white" />
+      <geom type="box" size="0.604 0.401 0.023" pos="0 -3 -0.306" material="vention_blue" />
+      <geom type="box" size="0.604 0.401 0.411" pos="0 -3 -0.017" class="vention_collision" conaffinity="1" />
+    </body>
+  
+    <body name="centrifuge_50ml_screw_1" pos="0.0 -3.03 0.44" quat="1 0 0 0">
+      <joint name="centrifuge_50ml_screw_joint_1" type="free" damping="1.0" armature="0.01" />
+      <inertial pos="0 0 0" mass="0.2" diaginertia="0.02 0.02 0.02" />
+      <geom type="mesh" mesh="centrifuge_50ml_screw_body-visual" material="centrifuge_50ml_screw_body" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="centrifuge_50ml_screw_body-visual" material="centrifuge_50ml_screw_body" condim="3" friction="0.5 0.01 0.01" group="0" contype="1" conaffinity="1" />
+      <geom name="tube_body_cyl_1" type="cylinder" size="0.013 0.0513" pos="0 0 0.0513" friction="1.2 0.02 0.02" condim="4" priority="2" group="5" rgba="0.7 0.9 1 0.15" contype="0" conaffinity="0" />
+    </body>
+    <body name="centrifuge_50ml_screw_cap_1" pos="0.0 -3.03 0.56" quat="0 1 0 0">
+      <joint name="centrifuge_50ml_screw_cap_joint_1" type="free" damping="1.0" armature="0.01" />
+      <inertial pos="0 0 0" mass="0.05" diaginertia="0.005 0.005 0.005" />
+      <geom type="mesh" mesh="centrifuge_50ml_screw_cap-visual" material="centrifuge_50ml_screw_cap" group="0" contype="0" conaffinity="0" />
+      <geom type="mesh" mesh="centrifuge_50ml_screw_cap-visual" rgba="0 1 0 0.35" condim="3" friction="0.5 0.01 0.01" group="5" contype="1" conaffinity="1" />
+      <geom name="tube_cap_cyl_1" type="cylinder" size="0.0176 0.0062" pos="0 0 0.0062" friction="1.2 0.02 0.02" condim="4" priority="2" margin="0.0001" group="5" rgba="1 0.8 0.6 0.15" contype="0" conaffinity="0" />
+    </body>
+
+    <body name="pipette_station" pos="0.2 -2.8 0.39" quat="0 0 0 1">
+      <frame pos="-0.3 0.0 0" euler="0.0 0.0 1.5708">
+        <attach model="pipette_rack" body="pipette_rack" prefix="piprack" />
+      </frame>
+      <frame pos="0.061 0 0.02">
+        <attach model="tip_box" body="tip_box" prefix="tipbox" scale="1.5" />
+      </frame>
+    </body>
+
+    <body name="pipette_free" pos="0.45 -2.78 0.65" euler="0.0 0.3 0">
+      <joint name="pipette_joint" type="free" damping="1.0" armature="0.01" />
+      <inertial pos="0 0 0" mass="0.12" diaginertia="0.002 0.002 0.002" />
+      <attach model="pipette" body="pipette" prefix="pip" />
+    </body>
+
+    <body name="pipette_mounted_tip" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_mounted_tip_joint" type="free" damping="1.0" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="mounted_tip/" />
+    </body>
+
+    <body name="pipette_tip_01" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_01" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip01" />
+    </body>
+    <body name="pipette_tip_02" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_02" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip02" />
+    </body>
+    <body name="pipette_tip_03" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_03" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip03" />
+    </body>
+    <body name="pipette_tip_04" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_04" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip04" />
+    </body>
+    <body name="pipette_tip_05" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_05" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip05" />
+    </body>
+    <body name="pipette_tip_06" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_06" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip06" />
+    </body>
+    <body name="pipette_tip_07" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_07" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip07" />
+    </body>
+    <body name="pipette_tip_08" pos="10 10 -10" quat="1 0 0 0">
+      <joint name="pipette_tip_joint_08" type="free" damping="0.4" armature="0.001" />
+      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00001 0.00001 0.00001" />
+      <attach model="pipette_tip" body="pipette_tip" prefix="tip08" />
+    </body>
+  </worldbody>
+  <actuator>
+    <motor name="joint0_ctrl" joint="joint0" class="motor" />
+    <position class="position" name="shoulder_pan" joint="shoulder_pan" />
+    <position class="position" name="shoulder_lift" joint="shoulder_lift" />
+    <position class="position_limited" name="elbow" joint="elbow" />
+    <position class="position_small" name="wrist_1" joint="wrist_1" />
+    <position class="position_small" name="wrist_2" joint="wrist_2" />
+    <position class="position_small" name="wrist_3" joint="wrist_3" />
+    <position class="position1" name="ur5e1_shoulder_pan" joint="ur5e1_shoulder_pan" />
+    <position class="position1" name="ur5e1_shoulder_lift" joint="ur5e1_shoulder_lift" />
+    <position class="position_limited1" name="ur5e1_elbow" joint="ur5e1_elbow" />
+    <position class="position_small1" name="ur5e1_wrist_1" joint="ur5e1_wrist_1" />
+    <position class="position_small1" name="ur5e1_wrist_2" joint="ur5e1_wrist_2" />
+    <position class="position_small1" name="ur5e1_wrist_3" joint="ur5e1_wrist_3" />
+  </actuator>
+  <contact>
+    <exclude body1="base_link" body2="Link_1" />
+    <exclude body1="centrifuge_50ml_screw_1" body2="centrifuge_50ml_screw_cap_1" />
+  </contact>
+  <equality>
+    <weld name="centrifuge_50ml_screw_cap_weld_1" active="false" body1="centrifuge_50ml_screw_1" body2="centrifuge_50ml_screw_cap_1" solref="0.03 1" solimp="0.85 0.93 0.003" torquescale="0.02" />
+    <weld name="pipette_gripper_weld" active="true" body1="2f85_1base" body2="pipette_free" relpose="-0.031139466273580767 -0.00011189791978465178 0.095116498891593265 0.70678609099096812 -0.00075392606155671104 -0.70742645531678561 -0.00081455210311408126" solref="0.005 1" solimp="0.95 0.99 0.001" torquescale="0.1" />
+    <weld name="pipette_tip_weld" active="true" body1="pipette_free" body2="pipette_mounted_tip" relpose="0.06 0 -0.12 1.32679e-06 0 0 1" solref="0.005 1" solimp="0.95 0.99 0.001" torquescale="0.1" />
+  </equality>
+  <sensor>
+    <framepos name="base_link_site_pos" objtype="site" objname="base_link_site" />
+    <framequat name="base_link_site_quat" objtype="site" objname="base_link_site" />
+    <framelinvel name="base_link_site_linvel" objtype="site" objname="base_link_site" />
+    <frameangvel name="base_link_site_angvel" objtype="site" objname="base_link_site" />
+    <velocimeter name="base_link_site_vel" site="base_link_site" />
+  </sensor>
+  <keyframe>
+    <key name="home" qpos="0.59273178971095186 -1.5639693045964207 1.0677697911655948 -1.0433920250875699 -1.5288488042417765 2.1722608969109123 0.78855235781431421 0.00042903436650555725 0.78584387259497845 -0.76918460076167006 0.78855349113583495 0.00042754812418024278 0.78585963018453087 -0.76912699365376946 3.3334466799116211 -1.3171142281297843 2.4408933115808731 -4.0187574927883283 -0.21029832390698378 -0.20982569187103522 0.66705489932834761 0.00028900916497779229 0.66070835912211567 -0.65702600619247842 0.66704996941430894 0.00030804075969098106 0.66068695751659168 -0.65729880249215289 5.7875501314375654e-13 0.036231385828102265 -3.019250360031736 0.39972110348303919 0.99981705243597341 -0.015422753552622067 0.007593369157564608 -0.0083869586820582535 0.18262842542359278 -3.0596643469612799 0.40726750291963798 -8.2185056168312826e-06 0.99994327453945153 0.010651180017954287 2.9442218748843416e-08 -0.013948389542634165 -3.0230974139367404 0.73847630631868244 0.99955752517137986 0.01482059212300877 0.024943672220397554 -0.0065511173513435484 -2.1632909216630047e-05 4.1727706006491959e-05 -0.0035884431340683105 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0 10 10 -10 1 0 0 0" ctrl="5.7875501314375654e-13 0.59273178971095186 -1.5639693045964207 1.0677697911655948 -1.0433920250875699 -1.5288488042417765 2.1722608969109123 3.3334466799116211 -1.3171142281297843 2.4408933115808731 -4.0187574927883283 -0.21029832390698378 -0.20982569187103522 255 255" />
+  </keyframe>
+</mujoco>

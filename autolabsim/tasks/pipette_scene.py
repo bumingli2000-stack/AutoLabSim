@@ -12,7 +12,12 @@ import numpy as np
 from ..scene import free_joint_pose, site_pose
 from .common import random_reset_info
 
-
+'''负责查询：
+    当前有效枪头；
+    最近枪头；
+    当前有效离心管；
+    枪头 mount/end site
+'''
 class PipetteSceneQuery:
     """Read active pipette-tip and centrifuge-tube information from the scene."""
 
@@ -47,8 +52,17 @@ class PipetteSceneQuery:
         return self.fallback_tube_joint
 
     def nearest_active_tip(self) -> dict[str, Any]:
-        """Return scene information for the active tip nearest to the pipette."""
+        """选择当前距离移液枪最近的有效枪头。
 
+            候选枪头来源：
+            1. 优先读取本次随机重置记录中的 active 枪头；
+            2. 如果没有随机记录，则扫描场景中所有匹配前缀的枪头 joint。
+
+            过滤规则：
+            - z < -1.0 的枪头视为被隐藏或移出工作区；
+            - 使用 mount site 与 pipette tip site 的 XY 距离排序；
+            - 如果模型没有 mount/end site，则退化为使用 free joint 位姿。
+        """
         pipette_tip_pos, _ = site_pose(
             self.model,
             self.data,

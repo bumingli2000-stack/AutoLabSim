@@ -134,7 +134,109 @@
     <mesh name="centrifuge_1500ul_no_lid-visual_visual" file="../../assets/container/centrifuge_1500ul_no_lid_vis/visual.obj" scale="0.002 0.002 0.002" />
     <material name="centrifuge_1500ul_no_lid" rgba="1 1 1 0.2" />
     <mesh name="centrifuge_10slot_vis" file="../../assets/rack/centrifuge_10slot_vis/centrifuge_10slot_vis.obj" scale="0.0015 0.0015 0.0015" />
-    <mesh name="centrifuge_plate_60well_vis" file="../../assets/rack/centrifuge_plate_60well_vis/centrifuge_plate_60well_vis.obj" scale="0.0015 0.0015 0.0015" />
+    <mesh name="upper1" file="../../assets/rack/centrifuge_10slot_vis/upper1.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper2" file="../../assets/rack/centrifuge_10slot_vis/upper2.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper3" file="../../assets/rack/centrifuge_10slot_vis/upper3.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper4" file="../../assets/rack/centrifuge_10slot_vis/upper4.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper5" file="../../assets/rack/centrifuge_10slot_vis/upper5.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper6" file="../../assets/rack/centrifuge_10slot_vis/upper6.STL" scale="0.0015 0.0015 0.0015" />	  	  
+	<mesh name="upper7" file="../../assets/rack/centrifuge_10slot_vis/upper7.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper8" file="../../assets/rack/centrifuge_10slot_vis/upper8.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper9" file="../../assets/rack/centrifuge_10slot_vis/upper9.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper10" file="../../assets/rack/centrifuge_10slot_vis/upper10.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper11" file="../../assets/rack/centrifuge_10slot_vis/upper11.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper12" file="../../assets/rack/centrifuge_10slot_vis/upper12.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper13" file="../../assets/rack/centrifuge_10slot_vis/upper13.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper14" file="../../assets/rack/centrifuge_10slot_vis/upper14.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper15" file="../../assets/rack/centrifuge_10slot_vis/upper15.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper16" file="../../assets/rack/centrifuge_10slot_vis/upper16.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper17" file="../../assets/rack/centrifuge_10slot_vis/upper17.STL" scale="0.0015 0.0015 0.0015" />
+	<mesh name="upper18" file="../../assets/rack/centrifuge_10slot_vis/upper18.STL" scale="0.0015 0.0015 0.0015" />
+
+
+    <mesh name="pl1" file="../../assets/rack/centrifuge_plate_60well_vis/pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl2" file="../../assets/rack/centrifuge_plate_60well_vis/pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl3" file="../../assets/rack/centrifuge_plate_60well_vis/pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl4" file="../../assets/rack/centrifuge_plate_60well_vis/pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl5" file="../../assets/rack/centrifuge_plate_60well_vis/pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl6" file="../../assets/rack/centrifuge_plate_60well_vis/pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl7" file="../../assets/rack/centrifuge_plate_60well_vis/pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl8" file="../../assets/rack/centrifuge_plate_60well_vis/pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl9" file="../../assets/rack/centrifuge_plate_60well_vis/pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl10" file="../../assets/rack/centrifuge_plate_60well_vis/pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl11" file="../../assets/rack/centrifuge_plate_60well_vis/pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl12" file="../../assets/rack/centrifuge_plate_60well_vis/pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="pl13" file="../../assets/rack/centrifuge_plate_60well_vis/pl13.STL" scale="0.0015 0.0015 0.0015" />
+
+	  <mesh name="2pl1" file="../../assets/rack/centrifuge_plate_60well_vis/2pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl2" file="../../assets/rack/centrifuge_plate_60well_vis/2pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl3" file="../../assets/rack/centrifuge_plate_60well_vis/2pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl4" file="../../assets/rack/centrifuge_plate_60well_vis/2pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl5" file="../../assets/rack/centrifuge_plate_60well_vis/2pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl6" file="../../assets/rack/centrifuge_plate_60well_vis/2pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl7" file="../../assets/rack/centrifuge_plate_60well_vis/2pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl8" file="../../assets/rack/centrifuge_plate_60well_vis/2pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl9" file="../../assets/rack/centrifuge_plate_60well_vis/2pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl10" file="../../assets/rack/centrifuge_plate_60well_vis/2pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl11" file="../../assets/rack/centrifuge_plate_60well_vis/2pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl12" file="../../assets/rack/centrifuge_plate_60well_vis/2pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="2pl13" file="../../assets/rack/centrifuge_plate_60well_vis/2pl13.STL" scale="0.0015 0.0015 0.0015" />
+
+	  <mesh name="3pl1" file="../../assets/rack/centrifuge_plate_60well_vis/3pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl2" file="../../assets/rack/centrifuge_plate_60well_vis/3pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl3" file="../../assets/rack/centrifuge_plate_60well_vis/3pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl4" file="../../assets/rack/centrifuge_plate_60well_vis/3pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl5" file="../../assets/rack/centrifuge_plate_60well_vis/3pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl6" file="../../assets/rack/centrifuge_plate_60well_vis/3pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl7" file="../../assets/rack/centrifuge_plate_60well_vis/3pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl8" file="../../assets/rack/centrifuge_plate_60well_vis/3pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl9" file="../../assets/rack/centrifuge_plate_60well_vis/3pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl10" file="../../assets/rack/centrifuge_plate_60well_vis/3pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl11" file="../../assets/rack/centrifuge_plate_60well_vis/3pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl12" file="../../assets/rack/centrifuge_plate_60well_vis/3pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="3pl13" file="../../assets/rack/centrifuge_plate_60well_vis/3pl13.STL" scale="0.0015 0.0015 0.0015" />
+
+	  <mesh name="4pl1" file="../../assets/rack/centrifuge_plate_60well_vis/4pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl2" file="../../assets/rack/centrifuge_plate_60well_vis/4pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl3" file="../../assets/rack/centrifuge_plate_60well_vis/4pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl4" file="../../assets/rack/centrifuge_plate_60well_vis/4pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl5" file="../../assets/rack/centrifuge_plate_60well_vis/4pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl6" file="../../assets/rack/centrifuge_plate_60well_vis/4pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl7" file="../../assets/rack/centrifuge_plate_60well_vis/4pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl8" file="../../assets/rack/centrifuge_plate_60well_vis/4pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl9" file="../../assets/rack/centrifuge_plate_60well_vis/4pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl10" file="../../assets/rack/centrifuge_plate_60well_vis/4pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl11" file="../../assets/rack/centrifuge_plate_60well_vis/4pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl12" file="../../assets/rack/centrifuge_plate_60well_vis/4pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="4pl13" file="../../assets/rack/centrifuge_plate_60well_vis/4pl13.STL" scale="0.0015 0.0015 0.0015" />
+
+	  <mesh name="5pl1" file="../../assets/rack/centrifuge_plate_60well_vis/5pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl2" file="../../assets/rack/centrifuge_plate_60well_vis/5pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl3" file="../../assets/rack/centrifuge_plate_60well_vis/5pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl4" file="../../assets/rack/centrifuge_plate_60well_vis/5pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl5" file="../../assets/rack/centrifuge_plate_60well_vis/5pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl6" file="../../assets/rack/centrifuge_plate_60well_vis/5pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl7" file="../../assets/rack/centrifuge_plate_60well_vis/5pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl8" file="../../assets/rack/centrifuge_plate_60well_vis/5pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl9" file="../../assets/rack/centrifuge_plate_60well_vis/5pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl10" file="../../assets/rack/centrifuge_plate_60well_vis/5pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl11" file="../../assets/rack/centrifuge_plate_60well_vis/5pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl12" file="../../assets/rack/centrifuge_plate_60well_vis/5pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="5pl13" file="../../assets/rack/centrifuge_plate_60well_vis/5pl13.STL" scale="0.0015 0.0015 0.0015" />
+
+	  <mesh name="6pl1" file="../../assets/rack/centrifuge_plate_60well_vis/6pl1.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl2" file="../../assets/rack/centrifuge_plate_60well_vis/6pl2.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl3" file="../../assets/rack/centrifuge_plate_60well_vis/6pl3.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl4" file="../../assets/rack/centrifuge_plate_60well_vis/6pl4.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl5" file="../../assets/rack/centrifuge_plate_60well_vis/6pl5.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl6" file="../../assets/rack/centrifuge_plate_60well_vis/6pl6.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl7" file="../../assets/rack/centrifuge_plate_60well_vis/6pl7.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl8" file="../../assets/rack/centrifuge_plate_60well_vis/6pl8.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl9" file="../../assets/rack/centrifuge_plate_60well_vis/6pl9.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl10" file="../../assets/rack/centrifuge_plate_60well_vis/6pl10.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl11" file="../../assets/rack/centrifuge_plate_60well_vis/6pl11.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl12" file="../../assets/rack/centrifuge_plate_60well_vis/6pl12.STL" scale="0.0015 0.0015 0.0015" />
+	  <mesh name="6pl13" file="../../assets/rack/centrifuge_plate_60well_vis/6pl13.STL" scale="0.0015 0.0015 0.0015" />	  
     <mesh name="centrifuge_50ml_vis" file="../../assets/container/centrifuge_50ml_vis/centrifuge_50ml_vis.obj" scale="0.001 0.001 0.001" />
     <mesh name="centrifuge_10ml_vis" file="../../assets/container/centrifuge_10ml_vis/centrifuge_10ml_vis.obj" scale="0.001 0.001 0.001" />
     <mesh name="centrifuge_50ml_screw_body-visual" file="../../assets/container/centrifuge_50ml_vis/centrifuge_tube_50ml_body.STL" scale="0.001 0.001 0.001" />
@@ -347,16 +449,560 @@
       <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" />
       <geom type="mesh" mesh="tableright" rgba="1 1 1 1" group="0" />
     </body>
-    <body name="centrifuge_10slot_vis" pos="-0.35 -3.05 0.38" euler="0 0 0">
-      <inertial pos="0 0 0" mass="1" diaginertia="1 1 1" />
-      <geom type="mesh" mesh="centrifuge_10slot_vis" rgba="1 1 1 1" group="0" />
-      <geom type="mesh" mesh="centrifuge_10slot_vis" rgba="1 1 1 1" group="0" />
-    </body>
-    <body name="centrifuge_plate_60well_vis" pos="-0.45 -3.25 0.41" euler="0 0 0">
-      <inertial pos="0 0 0" mass="1" diaginertia="1 1 1" />
-      <geom type="mesh" mesh="centrifuge_plate_60well_vis" rgba="1 1 1 1" group="0" />
-      <geom type="mesh" mesh="centrifuge_plate_60well_vis" rgba="1 1 1 1" group="0" />
-    </body>
+    <!-- 10孔白色板子（用于50mL试管） -->
+	<body name="upper1" pos="-0.30 -3 0.38" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="upper1" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="upper1" rgba="1 1 1 1" group="0"/>
+	</body>
+	<body name="upper2" pos="-0.3 -3 0.38" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="upper2" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="upper2" rgba="1 1 1 1" group="0"/>
+	</body>
+	  <body name="upper3" pos="-0.3 -3 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper3" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper4" pos="-0.351 -3 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper5" pos="-0.41 -3 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper6" pos="-0.453 -3 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper6" rgba="1 1 1 1" group="0"/>
+	  </body>	  	  
+	  <body name="upper7" pos="-0.3 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper7" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper8" pos="-0.3 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper8" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper9" pos="-0.3 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper9" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper10" pos="-0.351 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper10" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper11" pos="-0.41 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper11" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper12" pos="-0.453 -3.028 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper12" rgba="1 1 1 1" group="0"/>
+	  </body>	  	  
+	  <body name="upper13" pos="-0.3 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper13" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper14" pos="-0.3 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper14" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper14" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper15" pos="-0.3 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper15" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper15" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper16" pos="-0.351 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper16" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper16" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper17" pos="-0.41 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper17" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper17" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="upper18" pos="-0.453 -3.07 0.38" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="upper18" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="upper18" rgba="1 1 1 1" group="0"/>
+	  </body>
+    <body name="pl1" pos="-0.45 -3.25 0.41" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="pl1" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="pl1" rgba="1 1 1 1" group="0"/>
+	</body>
+	  <body name="2pl1" pos="-0.45 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl1" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl1" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl1" pos="-0.45 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl1" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl1" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl1" pos="-0.45 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl1" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl1" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl1" pos="-0.45 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl1" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl1" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl1" pos="-0.45 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl1" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl1" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	<body name="pl2" pos="-0.434 -3.25 0.41" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="pl2" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="pl2" rgba="1 1 1 1" group="0"/>
+	</body>
+	  <body name="2pl2" pos="-0.434 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl2" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl2" pos="-0.434 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl2" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl2" pos="-0.434 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl2" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl2" pos="-0.434 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl2" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl2" pos="-0.434 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl2" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  
+	<body name="pl3" pos="-0.41 -3.25 0.41" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="pl3" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="pl3" rgba="1 1 1 1" group="0"/>
+	</body>
+	  <body name="2pl3" pos="-0.41 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl2" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl3" pos="-0.41 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl3" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl3" pos="-0.41 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl3" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl3" pos="-0.41 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl3" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl3" pos="-0.41 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl3" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl3" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	<body name="pl4" pos="-0.386 -3.25 0.41" euler="0 0 0">
+		<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		<geom type="mesh" mesh="pl4" rgba="1 1 1 1" group="0"/>
+		<geom type="mesh" mesh="pl4" rgba="1 1 1 1" group="0"/>
+	</body>
+	  <body name="2pl4" pos="-0.386 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl4" pos="-0.386 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl4" pos="-0.386 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl4" pos="-0.386 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl4" pos="-0.386 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl4" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl4" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  
+	  <body name="pl5" pos="-0.364 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl5" pos="-0.364 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl5" pos="-0.364 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl5" pos="-0.364 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl5" pos="-0.364 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl5" pos="-0.364 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl5" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl5" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  
+	  <body name="pl6" pos="-0.338 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl6" pos="-0.338 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="3pl6" pos="-0.338 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="4pl6" pos="-0.338 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="5pl6" pos="-0.338 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="6pl6" pos="-0.338 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl6" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl6" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  
+	  
+	  
+	  <body name="pl7" pos="-0.315 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl7" pos="-0.315 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl7" pos="-0.315 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl7" pos="-0.315 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl7" pos="-0.315 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl7" pos="-0.315 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl7" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl7" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  
+	  
+	  
+	  <body name="pl8" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl8" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl8" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl8" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl8" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl8" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl8" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl8" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  <body name="pl9" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl9" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl9" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl9" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl9" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl9" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl9" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl9" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  <body name="pl10" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl10" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl10" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl10" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl10" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl10" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl10" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl10" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  <body name="pl11" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl11" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl11" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl11" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl11" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl11" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl11" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl11" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  <body name="pl12" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl12" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl12" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl12" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl12" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl12" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl12" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl12" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  
+	  
+	  
+	  <body name="pl13" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+	  <body name="2pl13" pos="-0.306 -3.25 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="2pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="2pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="3pl13" pos="-0.306 -3.253 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="3pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="3pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="4pl13" pos="-0.306 -3.271 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="4pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="4pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="5pl13" pos="-0.306 -3.292 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="5pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="5pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+
+	  <body name="6pl13" pos="-0.306 -3.303 0.41" euler="0 0 0">
+		  <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
+		  <geom type="mesh" mesh="6pl13" rgba="1 1 1 1" group="0"/>
+		  <geom type="mesh" mesh="6pl13" rgba="1 1 1 1" group="0"/>
+	  </body>
+
     <body name="Microscope" pos="-2.7 -0.3 0.36" euler="0 0 0">
       <inertial pos="0 0 0" mass="1" diaginertia="1 1 1" />
       <geom type="mesh" mesh="Microscope" rgba="1 1 1 1" group="0" />
@@ -493,25 +1139,25 @@
       <geom type="mesh" mesh="centrifuge_15ml_screw_cap-visual" material="centrifuge_15ml_screw_cap" group="0" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_cap-visual" material="centrifuge_15ml_screw_cap" condim="3" friction="0.5 0.01 0.01" group="0" />
     </body>
-    <body name="centrifuge_15ml_screw_3" pos="-0.33375 -3.25 0.44" quat="1 0 0 0">
+    <body name="centrifuge_15ml_screw_3" pos="-0.335 -3.25 0.44" quat="1 0 0 0">
       <joint name="centrifuge_15ml_screw_joint_3" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.01 0.01 0.01" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_body-visual" material="centrifuge_15ml_screw_body" group="0" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_body-visual" material="centrifuge_15ml_screw_body" condim="3" friction="0.5 0.01 0.01" group="0" />
     </body>
-    <body name="centrifuge_15ml_screw_cap_3" pos="-0.33375 -3.25 0.56" quat="0 1 0 0">
+    <body name="centrifuge_15ml_screw_cap_3" pos="-0.335 -3.25 0.56" quat="0 1 0 0">
       <joint name="centrifuge_15ml_screw_cap_joint_3" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.03" diaginertia="0.003 0.003 0.003" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_cap-visual" material="centrifuge_15ml_screw_cap" group="0" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_cap-visual" material="centrifuge_15ml_screw_cap" condim="3" friction="0.5 0.01 0.01" group="0" />
     </body>
-    <body name="centrifuge_15ml_screw_4" pos="-0.48375 -3.25 0.44" quat="1 0 0 0">
+    <body name="centrifuge_15ml_screw_4" pos="-0.289 -3.25 0.44" quat="1 0 0 0">
       <joint name="centrifuge_15ml_screw_joint_4" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.01 0.01 0.01" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_body-visual" material="centrifuge_15ml_screw_body" group="0" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_body-visual" material="centrifuge_15ml_screw_body" condim="3" friction="0.5 0.01 0.01" group="0" />
     </body>
-    <body name="centrifuge_15ml_screw_cap_4" pos="-0.48375 -3.25 0.56" quat="0 1 0 0">
+    <body name="centrifuge_15ml_screw_cap_4" pos="-0.289 -3.25 0.56" quat="0 1 0 0">
       <joint name="centrifuge_15ml_screw_cap_joint_4" type="free" damping="1.0" armature="0.01" />
       <inertial pos="0 0 0" mass="0.03" diaginertia="0.003 0.003 0.003" />
       <geom type="mesh" mesh="centrifuge_15ml_screw_cap-visual" material="centrifuge_15ml_screw_cap" group="0" />

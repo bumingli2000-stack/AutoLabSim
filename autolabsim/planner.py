@@ -110,7 +110,19 @@ def site_quat_for_joint_quat(
     )
     return normalize_quat(quat_multiply(target_joint_quat, local_site_quat))
 
-
+'''规划器核心职责：
+    TaskTarget
+        ↓
+    解析世界坐标目标
+        ↓
+    处理 attachment
+        ↓
+    计算机械臂末端目标
+        ↓
+    求解 IK
+        ↓
+    PlannedTaskTarget
+'''
 class TaskTargetPlanner:
     def __init__(
         self,

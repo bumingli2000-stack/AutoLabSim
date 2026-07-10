@@ -12,8 +12,18 @@ from .common import json_safe
 
 
 class PipetteMetadataBuilder:
-    """Build the stable metadata payload emitted by the pipette task."""
+    """构造移液枪任务的 episode metadata。
 
+        本类只读取已经完成的规划结果、任务配置和最终仿真状态，
+        不参与目标选择、IK 规划或轨迹执行。
+
+        输出内容用于：
+        - episode 可追溯性；
+        - 调参分析；
+        - IK 与视觉伺服误差检查；
+        - attachment 状态复现；
+        - 后续数据集转换。
+    """
     def __init__(self, env: Any, runtime: Any) -> None:
         self.env = env
         self.runtime = runtime

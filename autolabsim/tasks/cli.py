@@ -113,6 +113,7 @@ def run_episode(index: int, seed: int, episode_dir: Path, args: argparse.Namespa
         cameras=parse_cameras(args.cameras) if args.cameras else None,
     )
     model_path, reset_path = scene_rooted_path(scene_spec, PROJECT_ROOT)
+    # 创建通用的 TaskRequest 对象，包含创建任务所需的所有参数
     request = TaskRequest(
         task=args.task,
         seed=seed,
@@ -131,6 +132,7 @@ def run_episode(index: int, seed: int, episode_dir: Path, args: argparse.Namespa
     try:
         metadata = task.run()
     finally:
+        # 在任务完成后，关闭 MuJoCo renderer 和环境资源。
         task.finish()
     return summarize_metadata(args.task, metadata)
 
@@ -154,9 +156,9 @@ def _dry_run_summary(args: argparse.Namespace) -> dict[str, Any]:
 
 def run_batch(args: argparse.Namespace) -> int:
     seeds = parse_seeds(args.seeds, args.count, args.seed_start)
+    # 创建输出目录
     out_root = Path(args.out_root)
     out_root.mkdir(parents=True, exist_ok=True)
-
     manifest: dict[str, Any] = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "format": "autolabsim_batch_manifest_v1",
@@ -219,6 +221,8 @@ def run_batch(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # 解析命令行参数
     parser = build_batch_parser()
     args = parser.parse_args(argv)
+    # 批量 episode 调度器
     return run_batch(args)

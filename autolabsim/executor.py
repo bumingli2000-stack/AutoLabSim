@@ -11,7 +11,15 @@ from .motion_context import ArmMotionConfig, ExecutionContext, ExecutionSettings
 from .scene import actuator_id, apply_site_attachment, joint_qpos_ids, restore_free_joint_state, site_pose
 from .task_target import PlannedTaskTarget, gripper_command_to_actuator
 
-
+'''Executor 的职责：
+    轨迹插值；
+    下发 action；
+    执行夹爪命令；
+    waypoint settle；
+    伺服控制；
+    attachment 跟随；
+    记录目标误差。
+'''
 class TaskTargetExecutor:
     def __init__(
         self,

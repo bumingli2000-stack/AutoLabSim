@@ -2,6 +2,15 @@
 
 这个文件用于记录 AutoLabSim 每次阶段性修改的内容、原因和验证结果。后续同步到 GitHub 后，可以直接在仓库里查看完整演进记录。
 
+## 2026-07-09
+完善了部分文件注释，修复了一些无用逻辑，合并了本源关于scene_mujoco.xml文件的调整
+推荐关于任务二的阅读逻辑
+先看 pipette_grasp.py 的 run()
+→ 再看对应的 _stage_*()
+→ 再跳到 pipette_targets.py 看目标如何定义
+→ 场景对象不清楚时看 pipette_scene.py
+→ 最后看 metadata 记录了什么
+
 ## 2026-07-08
 ## 完成架构重构，核心路线已经从“任务类里手写坐标转换/IK/执行”改成：
 ## 选择对象 -> 定义 TaskTarget -> TaskTargetPlanner 规划 -> TaskTargetExecutor 执行 -> 更新 attachment

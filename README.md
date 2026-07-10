@@ -110,7 +110,8 @@ Minimal rules:
 python scripts/view_scene.py model/scenes/scene_mujoco_fast_tubes_pipette.xml \
   --reset-config configs/reset_pipette_tips_random_subset.json
 ```
-
+python scripts/view_scene.py model/scenes/scene_mujoco_fast_tubes_pipette_grasped.xml \
+ --reset-config configs/reset_pipette_grasped.json
 ### Generate Episodes with Images
 
 ```bash
