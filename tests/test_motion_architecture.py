@@ -29,7 +29,7 @@ from autolabsim.task_target import (
     TaskTargetResolver,
     _mat_to_quat_numpy,
 )
-from autolabsim.tasks.pipette_grasp import PipetteGraspTaskConfig
+from AutoLabSim.autolabsim.tasks.pipette_grasp.pipette_grasp import PipetteGraspTaskConfig
 
 
 IDENTITY_QUAT = np.asarray([1.0, 0.0, 0.0, 0.0], dtype=np.float64)

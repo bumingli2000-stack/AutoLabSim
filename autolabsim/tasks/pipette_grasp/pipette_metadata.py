@@ -6,9 +6,9 @@ from typing import Any
 
 import numpy as np
 
-from ..scene import free_joint_pose, site_pose
-from ..task_target import PlannedTaskTarget
-from .common import json_safe
+from autolabsim.scene import free_joint_pose, site_pose
+from autolabsim.task_target import PlannedTaskTarget
+from ..common import json_safe
 
 
 class PipetteMetadataBuilder:

@@ -10,13 +10,13 @@ from typing import Any
 
 import numpy as np
 
-from ..math3d import euler_xyz_to_mat, mat_to_quat, normalize_quat, quat_to_mat
-from ..planner import TaskTargetPlanner, site_quat_for_joint_quat
-from ..scene import free_joint_pose, site_pose
-from ..task_target import FrameRef, GripperCommand, PoseOffset, TaskTarget
-from .pipette_scene import PipetteSceneQuery
+from autolabsim.math3d import euler_xyz_to_mat, mat_to_quat, normalize_quat, quat_to_mat
+from autolabsim.planner import TaskTargetPlanner, site_quat_for_joint_quat
+from autolabsim.scene import free_joint_pose, site_pose
+from autolabsim.task_target import FrameRef, GripperCommand, PoseOffset, TaskTarget
+from autolabsim.tasks.pipette_grasp.pipette_scene import PipetteSceneQuery
 
-
+# 各个抓取点参数配置
 @dataclass(frozen=True)
 class PipetteHandleGraspConfig:
     pregrasp_distance: float = 0.08

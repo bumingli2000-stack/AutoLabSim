@@ -9,8 +9,8 @@ from typing import Any
 
 import numpy as np
 
-from ..scene import free_joint_pose, site_pose
-from .common import random_reset_info
+from autolabsim.scene import free_joint_pose, site_pose
+from ..common import random_reset_info
 
 '''负责查询：
     当前有效枪头；

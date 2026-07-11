@@ -26,7 +26,7 @@ from autolabsim.scene import (
 )
 from autolabsim.reset_config import apply_reset_config, load_reset_config
 from autolabsim.tasks.common import ARM_DEFAULTS, cap_body_from_tube_joint, random_reset_info
-from autolabsim.tasks.pipette_grasp import PipetteHandleGraspConfig, PipetteModelConfig, PipetteTipTargetConfig
+from AutoLabSim.autolabsim.tasks.pipette_grasp.pipette_grasp import PipetteHandleGraspConfig, PipetteModelConfig, PipetteTipTargetConfig
 
 TASK_DEFAULTS = {
     "tube_side_grasp": {

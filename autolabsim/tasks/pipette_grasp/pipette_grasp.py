@@ -21,8 +21,8 @@ from typing import Any
 
 import numpy as np
 
-from ..executor import TaskTargetExecutor
-from ..motion_context import (
+from autolabsim.executor import TaskTargetExecutor
+from autolabsim.motion_context import (
     ExecutionContext,
     ExecutionSettings,
     FixedJointState,
@@ -34,18 +34,18 @@ from ..motion_context import (
     VisualServoSettings,
     arm_motion_configs,
 )
-from ..mujoco_env import EnvConfig
-from ..planner import TaskTargetPlanner
-from ..recorder import EpisodeRecorder
-from ..scene import (
+from ...mujoco_env import EnvConfig
+from ...planner import TaskTargetPlanner
+from ...recorder import EpisodeRecorder
+from ...scene import (
     actuator_id,
     capture_free_joint_state,
     capture_site_attachment,
     equality_id,
 )
-from ..task import AutoLabTask, TaskConfig
-from ..task_target import PlannedTaskTarget, TaskTarget
-from .common import ARM_DEFAULTS
+from ...task import AutoLabTask, TaskConfig
+from ...task_target import PlannedTaskTarget, TaskTarget
+from ..common import ARM_DEFAULTS
 from .pipette_metadata import PipetteMetadataBuilder
 from .pipette_scene import PipetteSceneQuery
 from .pipette_targets import (

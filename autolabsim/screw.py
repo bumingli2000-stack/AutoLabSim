@@ -87,10 +87,23 @@ class ScrewCapSystem(System):
         self._engaged_attachment = None
 
     def start_follow_after_release(self, env) -> None:
-        """Attach the released cap to the cap gripper for transport."""
+        """同步最终螺纹位姿，然后让瓶盖跟随夹爪。"""
+
         if not self.progress.released:
             return
-        self._engaged_attachment = capture_site_attachment(env.model, env.data, env.mujoco, self.cap_joint, self.cap_site)
+
+        # 旋拧最后一步中，试管可能在瓶盖更新之后才被恢复到
+        # held_tube_state。这里基于最终试管状态重新同步瓶盖。
+        self.synchronize_pose_from_current_tube(env)
+
+        # 此时再捕获瓶盖相对 cap gripper 的关系。
+        self._engaged_attachment = capture_site_attachment(
+            env.model,
+            env.data,
+            env.mujoco,
+            self.cap_joint,
+            self.cap_site,
+        )
         self._follow_after_release = True
 
     def engage(self, env) -> None:
@@ -118,23 +131,138 @@ class ScrewCapSystem(System):
             return
 
         _, current_site_quat = site_pose(env.model, env.data, env.mujoco, self.cap_site)
-        tube_pos, tube_quat = free_joint_pose(env.model, env.data, env.mujoco, self.tube_joint)
-        tube_axis = quat_to_mat(tube_quat)[:, 2]
-        screw_axis = np.asarray([0.0, 0.0, 1.0], dtype=np.float64)
-        raw_angle = signed_angle_about_axis(self._grasp_reference_quat, current_site_quat, screw_axis)
-        measured_twist = float(np.clip(max(0.0, -raw_angle), 0.0, self.release_angle))
-        twist_angle = measured_twist if self._commanded_twist is None else float(np.clip(self._commanded_twist, 0.0, self.release_angle))
-        lift_distance = min(self.max_lift, self.thread_pitch * (twist_angle / (2.0 * np.pi)))
 
-        base_pos = tube_pos + quat_to_mat(tube_quat) @ self._cap_relative_pos
-        base_quat = normalize_quat(quat_multiply(tube_quat, self._cap_relative_quat))
-        twist_quat = axis_angle_quat(screw_axis, -twist_angle)
-        world_quat = normalize_quat(quat_multiply(twist_quat, base_quat))
+        screw_axis = np.asarray(
+                [0.0, 0.0, 1.0],
+                dtype=np.float64,
+            )
+
+        raw_angle = signed_angle_about_axis(
+            self._grasp_reference_quat,
+            current_site_quat,
+            screw_axis,
+        )
+
+        measured_twist = float(
+            np.clip(
+                max(0.0, -raw_angle),
+                0.0,
+                self.release_angle,
+            )
+        )
+
+        twist_angle = (
+            measured_twist
+            if self._commanded_twist is None
+            else float(
+                np.clip(
+                    self._commanded_twist,
+                    0.0,
+                    self.release_angle,
+                )
+            )
+        )
+
+        self._apply_screw_pose(
+            env,
+            twist_angle,
+        )
+
+        if twist_angle >= self.release_angle - 1e-6:
+            self.progress.released = True
+
+    def _apply_screw_pose(
+        self,
+        env,
+        twist_angle: float,
+    ) -> None:
+        """根据当前试管位姿和累计旋转角，重新计算瓶盖位姿。"""
+
+        if (
+            self._cap_relative_pos is None
+            or self._cap_relative_quat is None
+        ):
+            return
+
+        twist_angle = float(
+            np.clip(
+                twist_angle,
+                0.0,
+                self.release_angle,
+            )
+        )
+
+        tube_pos, tube_quat = free_joint_pose(
+            env.model,
+            env.data,
+            env.mujoco,
+            self.tube_joint,
+        )
+
+        lift_distance = min(
+            self.max_lift,
+            self.thread_pitch
+            * (twist_angle / (2.0 * np.pi)),
+        )
+
+        tube_rot = quat_to_mat(tube_quat)
+
+        # 未旋转时，瓶盖在当前试管坐标系中的基础位姿。
+        base_pos = (
+            tube_pos
+            + tube_rot @ self._cap_relative_pos
+        )
+        base_quat = normalize_quat(
+            quat_multiply(
+                tube_quat,
+                self._cap_relative_quat,
+            )
+        )
+
+        # 在世界 Z 轴方向施加累计旋转。
+        screw_axis = np.asarray(
+            [0.0, 0.0, 1.0],
+            dtype=np.float64,
+        )
+        twist_quat = axis_angle_quat(
+            screw_axis,
+            -twist_angle,
+        )
+
+        world_quat = normalize_quat(
+            quat_multiply(
+                twist_quat,
+                base_quat,
+            )
+        )
+
         world_pos = base_pos.copy()
-        world_pos[2] = base_pos[2] + lift_distance
-        set_free_joint_pose(env.model, env.data, env.mujoco, self.cap_joint, world_pos, world_quat)
+        world_pos[2] += lift_distance
+
+        set_free_joint_pose(
+            env.model,
+            env.data,
+            env.mujoco,
+            self.cap_joint,
+            world_pos,
+            world_quat,
+        )
 
         self.progress.twist_angle = twist_angle
         self.progress.lift_distance = lift_distance
-        if twist_angle >= self.release_angle - 1e-6:
-            self.progress.released = True
+
+    def synchronize_pose_from_current_tube(self, env) -> None:
+        """使用当前试管位姿和最终旋转角同步瓶盖位姿。
+
+        该方法允许在 released=True 后执行，用于解决：
+        最后一次旋转更新瓶盖后，试管又被 ExecutionContext
+        恢复到固定状态，导致瓶盖和试管最终状态不一致的问题。
+        """
+
+        if not self.progress.engaged:
+            return
+
+        self._apply_screw_pose(
+            env,
+            self.progress.twist_angle,
+        )

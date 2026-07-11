@@ -2,6 +2,19 @@
 
 这个文件用于记录 AutoLabSim 每次阶段性修改的内容、原因和验证结果。后续同步到 GitHub 后，可以直接在仓库里查看完整演进记录。
 
+## 2026-07-11
+任务一 screw_cap 和任务二 pipette_grasp 都已经完成重构，目前文件结构如下（以任务二为例）：
+pipette_grasp.py   任务的主体流程，包括各个模块的定义及各个流程的顺序执行
+pipette_targets.py 用于定义任务目标点，并进行坐标系转换与IK规划
+pipette_scene.py   用于查询任务场景，比如解析枪头的实时位置，移液枪的位置等
+pipette_metadata.py用于构造该任务的数据，在本任务中，采集了较为完整的数据，可以根据需要转换成不同格式
+
+文件入口：
+generate_pipette_grasp_batch.py中的定义了一组基本参数，传入autolabsim.tasks.cli文件的main函数-->run_batch()-->run_episode()
+-->__init__.py中的create_task()-->注册表TASK_REGISTRY-->_create_pipette_grasp_task()-->pipette_grasp.py中的PipetteGraspTask 完成对象创建
+-->之后在run_episode()中执行任务主体流程
+
+
 ## 2026-07-09
 完善了部分文件注释，修复了一些无用逻辑，合并了本源关于scene_mujoco.xml文件的调整
 推荐关于任务二的阅读逻辑
