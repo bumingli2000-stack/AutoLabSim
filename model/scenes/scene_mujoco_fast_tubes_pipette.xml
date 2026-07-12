@@ -3,6 +3,9 @@
   <compiler angle="radian" autolimits="true" />
   <size memory="256M" />
   <option integrator="implicitfast" timestep="0.001" />
+  <visual>
+    <map znear="0.001"/>
+  </visual>
   <default>
     <default class="robot">
       <default class="motor">

@@ -42,6 +42,7 @@ from ...scene import (
     capture_free_joint_state,
     capture_site_attachment,
     equality_id,
+    site_pose,
 )
 from ...task import AutoLabTask, TaskConfig
 from ...task_target import PlannedTaskTarget, TaskTarget
@@ -381,6 +382,13 @@ class PipetteGraspTask(AutoLabTask):
             tool_holder,
             tip_mount,
         )
+        # 枪头已经下探进入离心管后，
+        # 再闭合 first arm 的夹爪。
+        self._stage_close_first_gripper_after_tip_insert(
+            recorder,
+            tool_holder,
+            tip_mount,
+        )
         tube_plan = tube_hover_plan + tube_near_plan
 
         arrays = recorder.to_arrays()
@@ -611,25 +619,142 @@ class PipetteGraspTask(AutoLabTask):
             next_context,
         )
 
-        first_close_action = np.asarray(
-            first_retreat_plan[-1].action,
-            dtype=np.float64,
-        ).copy()
-        first_close_action[self._gripper_id(self.runtime.robot.arm)] = (
-            self.runtime.robot.close_gripper
-        )
-        self.executor.move_action(
-            recorder,
-            first_close_action,
-            self.runtime.timing.close_steps,
-            "close_first_gripper_after_retreat",
-            next_context,
-        )
+        # first_close_action = np.asarray(
+        #     first_retreat_plan[-1].action,
+        #     dtype=np.float64,
+        # ).copy()
+        # first_close_action[self._gripper_id(self.runtime.robot.arm)] = (
+        #     self.runtime.robot.close_gripper
+        # )
+        # self.executor.move_action(
+        #     recorder,
+        #     first_close_action,
+        #     self.runtime.timing.close_steps,
+        #     "close_first_gripper_after_retreat",
+        #     next_context,
+        # )
         return PipetteHandoffResult(
             holder=next_holder,
             middle_grasp_plan=middle_grasp_plan,
             first_retreat_plan=first_retreat_plan,
         )
+
+    def _stage_close_first_gripper_after_tip_insert(
+        self,
+        recorder: EpisodeRecorder,
+        tool_holder: ToolAttachment,
+        tip_mount: TipMountResult,
+    ) -> np.ndarray:
+        """枪头进入离心管后，闭合 first arm、按压按钮并返回。"""
+
+        context = self._execution_context(
+            attachments=self._mounted_tip_follow(
+                tool_holder,
+                tip_mount,
+            )
+        )
+
+        # --------------------------------------------------
+        # 1. 闭合 first arm 夹爪
+        # --------------------------------------------------
+        close_action = np.asarray(
+            self.env.data.ctrl,
+            dtype=np.float64,
+        ).copy()
+
+        close_action[
+            self._gripper_id(self.runtime.robot.arm)
+        ] = self.runtime.robot.close_gripper
+
+        self.executor.move_action(
+            recorder,
+            close_action,
+            self.runtime.timing.close_steps,
+            "close_first_gripper_after_tip_insert",
+            context,
+        )
+
+        self.executor.hold_action(
+            recorder,
+            close_action,
+            self.runtime.timing.hold_steps,
+            "hold_first_gripper_closed_after_tip_insert",
+            context,
+        )
+
+        # --------------------------------------------------
+        # 2. 记录 first arm 当前待命位置
+        # --------------------------------------------------
+        gripper_site = self._gripper_site(
+            self.runtime.robot.arm
+        )
+
+        return_pos, return_quat = site_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            gripper_site,
+        )
+
+        # --------------------------------------------------
+        # 3. 构建按钮上方、下压和返回三个点
+        # --------------------------------------------------
+        button_targets = (
+            self.target_builder.button_press_targets(
+                return_pos,
+                return_quat,
+            )
+        )
+
+        # --------------------------------------------------
+        # 4. 按钮上方 → 下压位置
+        # --------------------------------------------------
+        press_plan = self._plan_targets(
+            button_targets[:2],
+            default_gripper_value=(
+                self.runtime.robot.close_gripper
+            ),
+        )
+
+        self.executor.execute(
+            recorder,
+            press_plan,
+            "press_pipette_button",
+            context,
+        )
+
+        # --------------------------------------------------
+        # 5. 在下压位置保持
+        # --------------------------------------------------
+        self.executor.hold_action(
+            recorder,
+            np.asarray(
+                press_plan[-1].action,
+                dtype=np.float64,
+            ),
+            self.runtime.timing.hold_steps,
+            "hold_pipette_button_pressed",
+            context,
+        )
+
+        # --------------------------------------------------
+        # 6. 返回原来的待命位置
+        # --------------------------------------------------
+        return_plan = self._plan_targets(
+            button_targets[2:],
+            default_gripper_value=(
+                self.runtime.robot.close_gripper
+            ),
+        )
+
+        self.executor.execute(
+            recorder,
+            return_plan,
+            "return_first_gripper_after_button_press",
+            context,
+        )
+
+        return close_action
 
     def _stage_mount_tip(
         self,

@@ -49,7 +49,25 @@ class PipetteHandleGraspConfig:
     first_retreat_after_handoff_offset: tuple[float, float, float] = (
         0.0,
         0.0,
-        0.10,
+        0.0,
+    )
+    # 按压按钮
+    button_above_offset: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.23,
+    )
+
+    button_press_offset: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.19,
+    )
+
+    button_gripper_euler: tuple[float, float, float] = (
+        0.0,
+        float(np.pi),
+        float(np.pi),
     )
 
 
@@ -68,7 +86,7 @@ class PipetteTipTargetConfig:
     tip_mount_site_suffix: str = "mount_site"
     tip_end_site_suffix: str = "tip_end_site"
     tip_pose_servo_enabled: bool = True
-    tip_hover_height: float = 0.03
+    tip_hover_height: float = 0.10
     tip_mount_offset: tuple[float, float, float] = (0.0, 0.0, -0.06)
     tip_mount_target_euler: tuple[float, float, float] = (
         0.0,
@@ -82,13 +100,38 @@ class PipetteTipTargetConfig:
         0.0,
     )
 
+@dataclass(frozen=True)
+class PipetteButtonTargetConfig:
+    press_arm: str = "first"
+
+    # 相对于移液枪 body 坐标系。
+    # 需要根据夹爪控制 site 与按钮的实际位置微调。
+    button_above_pos: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.23,
+    )
+
+    button_press_pos: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.185,
+    )
+
+    gripper_euler: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.0,
+    )
+
+    press_hold_steps: int = 20
 
 @dataclass(frozen=True)
 class PipetteTubeTargetConfig:
     tube_joint: str = "centrifuge_50mltube free joint 原点的_screw_joint_1"
     tube_top_offset: float = 0.103
     tube_hover_height: float = 0.10
-    tube_near_height: float = 0.03
+    tube_near_height: float = -0.02
     tube_target_offset: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
@@ -216,7 +259,7 @@ class PipetteTargetBuilder:
             controlled_site=self.gripper_site(arm_name),
             servo_mode="none",
             gripper=GripperCommand(
-                180.0,
+                255.0,
                 timing="after",
                 steps=self.close_steps,
             ),
@@ -260,9 +303,67 @@ class PipetteTargetBuilder:
                 quat_wxyz=tuple(gripper_quat.tolist()),
                 arm=self.primary_arm,
                 controlled_site=gripper_site,
-                servo_mode="position",
+                servo_mode="none",
                 gripper=self._open_during(),
             )
+        ]
+
+    def button_press_targets(
+        self,
+        return_pos: np.ndarray,
+        return_quat: np.ndarray,
+    ) -> list[TaskTarget]:
+        """按钮上方、下压按钮、返回原位置。"""
+
+        arm_name = self.primary_arm
+        gripper_site = self.gripper_site(arm_name)
+
+        pipette_parent = FrameRef(
+            "body",
+            self.pipette.pipette_body,
+        )
+
+        return [
+            TaskTarget(
+                name="first_gripper_button_above",
+                parent=pipette_parent,
+                pos=self.grasp.button_above_offset,
+                euler=self.grasp.button_gripper_euler,
+                arm=arm_name,
+                controlled_site=gripper_site,
+                servo_mode="pose",
+                gripper=self._closed_during(),
+            ),
+            TaskTarget(
+                name="first_gripper_button_press",
+                parent=pipette_parent,
+                pos=self.grasp.button_press_offset,
+                euler=self.grasp.button_gripper_euler,
+                arm=arm_name,
+                controlled_site=gripper_site,
+                servo_mode="none",
+                gripper=self._closed_during(),
+            ),
+            TaskTarget(
+                name="first_gripper_return_after_button",
+                parent=FrameRef("world"),
+                pos=tuple(
+                    np.asarray(
+                        return_pos,
+                        dtype=np.float64,
+                    ).tolist()
+                ),
+                quat_wxyz=tuple(
+                    np.asarray(
+                        return_quat,
+                        dtype=np.float64,
+                    ).tolist()
+                ),
+                arm=arm_name,
+                controlled_site=gripper_site,
+                servo_mode="none",
+                gripper=self._closed_during(),
+            ),
         ]
 
     def tip_hover_targets(self, arm_name: str) -> TipHoverTargets:
@@ -326,7 +427,7 @@ class PipetteTargetBuilder:
                 quat_wxyz=tuple(current_site_quat.tolist()),
                 arm=arm_name,
                 controlled_site=self.pipette.pipette_tip_site,
-                servo_mode="pose",
+                servo_mode="none",
                 gripper=self._closed_during(),
             ),
             TaskTarget(
@@ -342,11 +443,7 @@ class PipetteTargetBuilder:
                 ),
                 arm=arm_name,
                 controlled_site=self.pipette.pipette_tip_site,
-                servo_mode=(
-                    "pose"
-                    if self.tips.tip_pose_servo_enabled
-                    else "position"
-                ),
+                servo_mode="pose",
                 gripper=self._closed_during(),
             ),
         )
@@ -357,9 +454,7 @@ class PipetteTargetBuilder:
             "pipette_tip_mount_down",
             self.target_tip_info(),
             extra_offset=(0.0, 0.0, 0.0),
-            servo_mode=(
-                "pose" if self.tips.tip_pose_servo_enabled else "position"
-            ),
+            servo_mode="pose",
             arm_name=arm_name,
         )
         return [target]
@@ -369,9 +464,7 @@ class PipetteTargetBuilder:
             "pipette_tip_mounted_retract",
             self.target_tip_info(),
             extra_offset=(0.0, 0.0, self.tips.tip_hover_height),
-            servo_mode=(
-                "pose" if self.tips.tip_pose_servo_enabled else "position"
-            ),
+            servo_mode="none",
             arm_name=arm_name,
         )
         return [target]
@@ -468,7 +561,7 @@ class PipetteTargetBuilder:
             quat_wxyz=relative_site_quat,
             arm=arm_name,
             controlled_site=self.pipette.pipette_tip_site,
-            servo_mode="position",
+            servo_mode="none",
             gripper=self._closed_during(),
         )
         hover_resolved = self.planner.resolve(hover_target)

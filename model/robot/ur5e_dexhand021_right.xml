@@ -3,6 +3,10 @@
 
   <option integrator="implicitfast" timestep="0.001"/>
 
+  <visual>
+    <map znear="0.001"/>
+  </visual>
+  
   <default>
     <default class="ur5e">
       <default class="visual">
