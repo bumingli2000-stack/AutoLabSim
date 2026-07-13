@@ -115,14 +115,14 @@ python scripts/view_scene.py model/scenes/scene_mujoco_fast_tubes_pipette_graspe
 ### Generate Episodes with Images
 
 ```bash
-python scripts/generate_screw_cap_batch.py \
+python3 scripts/generate_screw_cap_batch.py \
   --count 1 \
   --with-images \
   --cameras overview_camera,wrist_cam,wrist_cam1 \
   --out-root data/episodes/screw_cap_batch
 ```
 ```bash
-python scripts/generate_pipette_grasp_batch.py \
+python3 scripts/generate_pipette_grasp_batch.py \
   --count 1 \
   --with-images \
   --cameras overview_camera,wrist_cam,wrist_cam1 \
@@ -132,7 +132,7 @@ python scripts/generate_pipette_grasp_batch.py \
 ### Export Episode Video
 
 ```bash
-python scripts/export_episode_images.py \
+python3 scripts/export_episode_images.py \
   data/episodes/screw_cap_batch \
   --camera overview_camera,wrist_cam,wrist_cam1 \
   --format mp4 \
@@ -140,7 +140,7 @@ python scripts/export_episode_images.py \
 ```
 
 ```bash
-python scripts/export_episode_images.py \
+python3 scripts/export_episode_images.py \
   data/episodes/pipette_grasp_batch \
   --camera overview_camera,wrist_cam,wrist_cam1 \
   --format mp4 \

@@ -132,6 +132,7 @@ class TaskTargetExecutor:
             alpha = step / denom
             alpha = alpha * alpha * (3.0 - 2.0 * alpha)
             action = (1.0 - alpha) * start + alpha * target_action
+            self.apply_constraints(context)
             obs, *_ = self.manager.step(action)
             obs = self.apply_constraints(context) or obs
             recorder.record(obs, action, phase)
@@ -145,6 +146,7 @@ class TaskTargetExecutor:
         context: ExecutionContext = ExecutionContext(),
     ) -> None:
         for _ in range(max(0, int(steps))):
+            self.apply_constraints(context)
             obs, *_ = self.manager.step(action)
             obs = self.apply_constraints(context) or obs
             recorder.record(obs, action, phase)
@@ -164,6 +166,7 @@ class TaskTargetExecutor:
             actual, _ = site_pose(self.env.model, self.env.data, self.env.mujoco, site_name)
             if float(np.linalg.norm(target - actual)) <= float(self.settings.waypoint_settle_pos_tol):
                 return
+            self.apply_constraints(context)
             obs, *_ = self.manager.step(action)
             obs = self.apply_constraints(context) or obs
             recorder.record(obs, action, settle_phase)

@@ -29,6 +29,7 @@ def apply_reset_config(model: Any, data: Any, mujoco: Any, config: ResetConfig, 
     rng = rng or np.random.default_rng()
 
     _apply_actuator_targets(model, data, mujoco, config.get("actuators", {}))
+    _apply_joint_positions(model, data, mujoco, config.get("joints", {}))
     _apply_free_joint_poses(model, data, mujoco, config.get("free_joints", {}))
     resolved.update(_apply_random_single_free_joint(model, data, mujoco, config.get("random_single_free_joint"), rng))
     resolved.update(_apply_random_free_joint_subset(model, data, mujoco, config.get("random_free_joint_subset"), rng))
@@ -54,6 +55,40 @@ def _apply_actuator_targets(model: Any, data: Any, mujoco: Any, targets: dict[st
             continue
         qadr = int(model.jnt_qposadr[joint_id])
         data.qpos[qadr] = value
+
+
+def _apply_joint_positions(model: Any, data: Any, mujoco: Any, joints: dict[str, Any]) -> None:
+    for joint_name, value in joints.items():
+        joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
+        if joint_id < 0:
+            raise ValueError(f"Unknown joint in reset config: {joint_name}")
+
+        qadr = int(model.jnt_qposadr[joint_id])
+        dofadr = int(model.jnt_dofadr[joint_id])
+        joint_type = int(model.jnt_type[joint_id])
+        if joint_type in (
+            int(mujoco.mjtJoint.mjJNT_HINGE),
+            int(mujoco.mjtJoint.mjJNT_SLIDE),
+        ):
+            data.qpos[qadr] = float(value)
+            data.qvel[dofadr] = 0.0
+            continue
+
+        if joint_type == int(mujoco.mjtJoint.mjJNT_BALL):
+            arr = np.asarray(value, dtype=np.float64)
+            if arr.shape != (4,):
+                raise ValueError(f"Ball joint {joint_name} reset value must have 4 numbers")
+            norm = np.linalg.norm(arr)
+            if norm == 0.0:
+                raise ValueError(f"Ball joint {joint_name} quaternion must not be all zeros")
+            data.qpos[qadr : qadr + 4] = arr / norm
+            data.qvel[dofadr : dofadr + 3] = 0.0
+            continue
+
+        if joint_type == int(mujoco.mjtJoint.mjJNT_FREE):
+            raise ValueError(
+                f"Free joint {joint_name} must be reset through the free_joints section"
+            )
 
 
 def _apply_free_joint_poses(model: Any, data: Any, mujoco: Any, poses: dict[str, dict[str, Any]]) -> None:

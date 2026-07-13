@@ -19,8 +19,27 @@ from autolabsim.tasks.pipette_grasp.pipette_grasp import (
     VisualServoConfig,
     WaypointSettleConfig,
 )
+from .adp.adp_tip_to_tube import (
+    AdpGripperSettings,
+    AdpIKConfig,
+    AdpTipToTubeTask,
+    AdpTipToTubeTaskConfig,
+    AdpTimingConfig,
+    AdpVisualServoConfig,
+    AdpWaypointSettleConfig,
+)
+from .adp.adp_scene import AdpSceneQuery
+from .adp.adp_targets import (
+    AdpPipetteModelConfig,
+    AdpTargetBuilder,
+    AdpTipTargetConfig,
+    AdpTrashConfig,
+    AdpTubeTargetConfig,
+)
+from .adp.adp_metadata import AdpMetadataBuilder
 
-# 通用的 TaskRequest 对象，包含创建任务所需的所有参数，可以理解为给任务工厂的通用订单
+
+# 通用的 TaskRequest 对象，包含创建任务所需的所有参数
 @dataclass(frozen=True)
 class TaskRequest:
     task: str
@@ -67,7 +86,7 @@ def _config_default(config_cls: type, field_name: str) -> Any:
         raise KeyError(f"Field has no default: {config_cls.__name__}.{field_name}")
     raise KeyError(f"Unknown config field: {config_cls.__name__}.{field_name}")
 
-# 通用的参数获取函数，从 params 字典中获取指定键的值，如果不存在则从配置类中获取默认值
+
 def _param(params: dict[str, Any], key: str, config_cls: type, field_name: str | None = None) -> Any:
     value = params.get(key)
     if value is not None:
@@ -91,16 +110,15 @@ def _quat_param(params: dict[str, Any], key: str, config_cls: type) -> tuple[flo
         raise ValueError(f"{key} must contain exactly 4 numbers")
     return tuple(arr.tolist())
 
-# 任务二的工厂函数，创建一个 PipetteGraspTask 对象
+
+# ---------- 任务工厂函数 ----------
 def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
     params = request.params
-    # 机器人配置，定义了机械臂和夹爪的相关参数
     robot = PipetteRobotConfig(
         arm=_param(params, "arm", PipetteRobotConfig),
         open_gripper=_param(params, "open_gripper", PipetteRobotConfig),
         close_gripper=_param(params, "close_gripper", PipetteRobotConfig),
     )
-    # 时序配置，定义了任务中各个阶段的时间步数
     timing = PipetteTimingConfig(
         settle_steps=_param(params, "settle_steps", PipetteTimingConfig),
         free_settle_steps=_param(params, "free_settle_steps", PipetteTimingConfig),
@@ -109,7 +127,6 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
         hold_steps=_param(params, "hold_steps", PipetteTimingConfig),
         grasp_hold_steps=_param(params, "grasp_hold_steps", PipetteTimingConfig),
     )
-    # 抓取配置，定义了抓取动作的相关参数，包括预抓取距离、抓取偏移量、抓取欧拉角等
     grasp = PipetteHandleGraspConfig(
         pregrasp_distance=_param(params, "pregrasp_distance", PipetteHandleGraspConfig),
         handle_grasp_offset=_vec_param(params, "handle_grasp_offset", PipetteHandleGraspConfig),
@@ -136,14 +153,12 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
             PipetteHandleGraspConfig,
         ),
     )
-    # pipette配置，定义了移液器的相关参数，包括关节、主体、尖端位置和停放焊接点等
     pipette = PipetteModelConfig(
         pipette_joint=_param(params, "pipette_joint", PipetteModelConfig),
         pipette_body=_param(params, "pipette_body", PipetteModelConfig),
         pipette_tip_site=_param(params, "pipette_tip_site", PipetteModelConfig),
         parking_weld=_param(params, "parking_weld", PipetteModelConfig),
     )
-    # tips配置，定义了移液器尖端的相关参数，包括尖端关节前缀、尖端站点前缀、尖端安装站点后缀、尖端末端站点后缀、尖端姿态伺服使能、尖端悬停高度、尖端安装偏移量、尖端安装目标欧拉角和垂直四元数等
     tips = PipetteTipTargetConfig(
         tip_joint_prefix=_param(params, "tip_joint_prefix", PipetteTipTargetConfig),
         tip_site_prefix=_param(params, "tip_site_prefix", PipetteTipTargetConfig),
@@ -155,7 +170,6 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
         tip_mount_target_euler=_vec_param(params, "tip_mount_target_euler", PipetteTipTargetConfig),
         vertical_quat=_quat_param(params, "vertical_quat", PipetteTipTargetConfig),
     )
-    # tube配置，定义了试管的相关参数，包括试管关节、试管顶部偏移量、试管悬停高度、试管接近高度和试管目标偏移量等
     tube = PipetteTubeTargetConfig(
         tube_joint=_param(params, "tube_joint", PipetteTubeTargetConfig),
         tube_top_offset=_param(params, "tube_top_offset", PipetteTubeTargetConfig),
@@ -163,19 +177,16 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
         tube_near_height=_param(params, "tube_near_height", PipetteTubeTargetConfig),
         tube_target_offset=_vec_param(params, "tube_target_offset", PipetteTubeTargetConfig),
     )
-    # ik配置，定义了逆运动学的相关参数，包括最大迭代次数、位置容差、旋转容差和阻尼系数等
     ik = IKConfig(
         ik_max_iters=_param(params, "ik_max_iters", IKConfig),
         ik_pos_tol=_param(params, "ik_pos_tol", IKConfig),
         ik_rot_tol=_param(params, "ik_rot_tol", IKConfig),
         ik_damping=_param(params, "ik_damping", IKConfig),
     )
-    # waypoint配置，定义了路径点的相关参数，包括路径点停留步数和路径点位置容差等
     waypoint = WaypointSettleConfig(
         waypoint_settle_steps=_param(params, "waypoint_settle_steps", WaypointSettleConfig),
         waypoint_settle_pos_tol=_param(params, "waypoint_settle_pos_tol", WaypointSettleConfig),
     )
-    # visual_servo配置，定义了视觉伺服的相关参数，包括视觉伺服使能、最大迭代次数、步数、位置容差、旋转容差、增益、积分增益和最大修正量等
     visual_servo = VisualServoConfig(
         visual_servo_enabled=_param(params, "visual_servo_enabled", VisualServoConfig),
         visual_servo_max_iters=_param(params, "visual_servo_max_iters", VisualServoConfig),
@@ -186,7 +197,6 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
         visual_servo_integral_gain=_param(params, "visual_servo_integral_gain", VisualServoConfig),
         visual_servo_max_correction=_param(params, "visual_servo_max_correction", VisualServoConfig),
     )
-    # 创建 PipetteGraspTask 对象，并传入 PipetteGraspTaskConfig 对象，包含所有配置参数
     return PipetteGraspTask(
         PipetteGraspTaskConfig(
             env=_make_env(request),
@@ -207,7 +217,7 @@ def _create_pipette_grasp_task(request: TaskRequest) -> PipetteGraspTask:
         )
     )
 
-# 任务一的工厂函数，创建一个 BimanualUnscrewTask 对象
+
 def _create_unscrew_task(request: TaskRequest) -> BimanualUnscrewTask:
     params = request.params
     return BimanualUnscrewTask(
@@ -255,7 +265,90 @@ def _create_unscrew_task(request: TaskRequest) -> BimanualUnscrewTask:
         )
     )
 
-# 概要函数，用于总结 PipetteGraspTask 的元数据
+
+def _create_adp_tip_to_tube_task(request: TaskRequest) -> AdpTipToTubeTask:
+    params = request.params
+    timing = AdpTimingConfig(
+        initial_static_steps=_param(params, "initial_static_steps", AdpTimingConfig),
+        settle_steps=_param(params, "settle_steps", AdpTimingConfig),
+        tool_stabilize_steps=_param(params, "tool_stabilize_steps", AdpTimingConfig),
+        steps_per_segment=_param(params, "steps_per_segment", AdpTimingConfig),
+        tip_hover_steps=_param(params, "tip_hover_steps", AdpTimingConfig),
+        close_steps=_param(params, "close_steps", AdpTimingConfig),
+        tip_mount_settle_steps=_param(params, "tip_mount_settle_steps", AdpTimingConfig),
+        hold_steps_5s=_param(params, "hold_steps", AdpTimingConfig, "hold_steps_5s"),
+        release_wait_steps=_param(params, "release_wait_steps", AdpTimingConfig),
+    )
+    ik = AdpIKConfig(
+        ik_max_iters=_param(params, "ik_max_iters", AdpIKConfig),
+        ik_pos_tol=_param(params, "ik_pos_tol", AdpIKConfig),
+        ik_rot_tol=_param(params, "ik_rot_tol", AdpIKConfig),
+        ik_damping=_param(params, "ik_damping", AdpIKConfig),
+    )
+    waypoint = AdpWaypointSettleConfig(
+        waypoint_settle_steps=_param(params, "waypoint_settle_steps", AdpWaypointSettleConfig),
+        waypoint_settle_pos_tol=_param(params, "waypoint_settle_pos_tol", AdpWaypointSettleConfig),
+    )
+    visual_servo = AdpVisualServoConfig(
+        visual_servo_enabled=_param(params, "visual_servo_enabled", AdpVisualServoConfig),
+        visual_servo_max_iters=_param(params, "visual_servo_max_iters", AdpVisualServoConfig),
+        visual_servo_steps=_param(params, "visual_servo_steps", AdpVisualServoConfig),
+        visual_servo_pos_tol=_param(params, "visual_servo_pos_tol", AdpVisualServoConfig),
+        visual_servo_rot_tol=_param(params, "visual_servo_rot_tol", AdpVisualServoConfig),
+        visual_servo_gain=_param(params, "visual_servo_gain", AdpVisualServoConfig),
+        visual_servo_integral_gain=_param(params, "visual_servo_integral_gain", AdpVisualServoConfig),
+        visual_servo_max_correction=_param(params, "visual_servo_max_correction", AdpVisualServoConfig),
+    )
+    gripper = AdpGripperSettings(
+        open_value=_param(params, "open_gripper", AdpGripperSettings, "open_value"),
+        close_value=_param(params, "close_gripper", AdpGripperSettings, "close_value"),
+    )
+    pipette = AdpPipetteModelConfig(
+        pipette_tip_site=_param(params, "pipette_tip_site", AdpPipetteModelConfig),
+        pipette_joint=_param(params, "pipette_joint", AdpPipetteModelConfig),
+        pipette_body=_param(params, "pipette_body", AdpPipetteModelConfig),
+    )
+    tips = AdpTipTargetConfig(
+        tip_joint_prefix=_param(params, "tip_joint_prefix", AdpTipTargetConfig),
+        tip_site_prefix=_param(params, "tip_site_prefix", AdpTipTargetConfig),
+        tip_mount_site_suffix=_param(params, "tip_mount_site_suffix", AdpTipTargetConfig),
+        tip_end_site_suffix=_param(params, "tip_end_site_suffix", AdpTipTargetConfig),
+        tip_pose_servo_enabled=_param(params, "tip_pose_servo_enabled", AdpTipTargetConfig),
+        tip_hover_height=_param(params, "tip_hover_height", AdpTipTargetConfig),
+        tip_retract_height=_param(params, "tip_retract_height", AdpTipTargetConfig),
+        tip_length=_param(params, "tip_length", AdpTipTargetConfig),
+        tip_mount_offset=_vec_param(params, "tip_mount_offset", AdpTipTargetConfig),
+    )
+    tube = AdpTubeTargetConfig(
+        tube_joint=_param(params, "tube_joint", AdpTubeTargetConfig),
+        tube_top_offset=_param(params, "tube_top_offset", AdpTubeTargetConfig),
+        tube_hover_height=_param(params, "tube_hover_height", AdpTubeTargetConfig),
+        tube_near_height=_param(params, "tube_near_height", AdpTubeTargetConfig),
+        tube_target_offset=_vec_param(params, "tube_target_offset", AdpTubeTargetConfig),
+    )
+    return AdpTipToTubeTask(
+        AdpTipToTubeTaskConfig(
+            env=_make_env(request),
+            out_dir=request.out_dir,
+            episode_index=request.episode_index,
+            seed=request.seed,
+            cameras=request.cameras,
+            with_images=request.with_images,
+            arm=_param(params, "arm", AdpTipToTubeTaskConfig),
+            timing=timing,
+            ik=ik,
+            waypoint=waypoint,
+            visual_servo=visual_servo,
+            gripper=gripper,
+            pipette=pipette,
+            tips=tips,
+            tube=tube,
+            trash=AdpTrashConfig(),
+        )
+    )
+
+
+# ---------- 任务摘要函数 ----------
 def _summarize_pipette_grasp(metadata: dict[str, Any]) -> dict[str, Any]:
     return {
         "metadata_found": True,
@@ -269,7 +362,7 @@ def _summarize_pipette_grasp(metadata: dict[str, Any]) -> dict[str, Any]:
         "final_pipette_quat": metadata["final_state_summary"]["pipette_quat"],
     }
 
-# 概要函数，用于总结 BimanualUnscrewTask 的元数据
+
 def _summarize_unscrew(metadata: dict[str, Any]) -> dict[str, Any]:
     return {
         "metadata_found": True,
@@ -285,13 +378,42 @@ def _summarize_unscrew(metadata: dict[str, Any]) -> dict[str, Any]:
         "twist_angle": metadata["screw_progress"]["twist_angle"],
     }
 
-# 任务注册表，映射任务名称到其工厂函数和概要函数
+
+def _summarize_adp_tip_to_tube(metadata: dict[str, Any]) -> dict[str, Any]:
+    # 聚合所有 waypoints 列表进行 IK 成功率检查
+    all_waypoints = (
+        metadata.get("tip_hover_waypoints", []) +
+        metadata.get("tip_mount_waypoints", []) +
+        metadata.get("tip_retract_waypoints", []) +
+        metadata.get("tube_hover_waypoints", []) +
+        metadata.get("tube_near_waypoints", []) +
+        metadata.get("tube_return_waypoints", []) +
+        metadata.get("trash_waypoints", []) +
+        metadata.get("release_waypoints", []) +
+        metadata.get("home_waypoints", [])
+    )
+    return {
+        "metadata_found": True,
+        "steps": metadata["steps"],
+        "slot_index": metadata.get("slot_index"),
+        "slot_name": metadata.get("slot_name"),
+        "ik_all_waypoints_solved": all(
+            item.get("ik_success", False) for item in all_waypoints if isinstance(item, dict)
+        ),
+        "final_pipette_pos": metadata["final_state_summary"]["pipette_pos"],
+        "final_pipette_quat": metadata["final_state_summary"]["pipette_quat"],
+    }
+
+
+# ---------- 任务注册表 ----------
 TASK_REGISTRY: dict[str, TaskSpec] = {
     "pipette_grasp": TaskSpec(factory=_create_pipette_grasp_task, summarize=_summarize_pipette_grasp),
     "tube_then_cap_grasp": TaskSpec(factory=_create_unscrew_task, summarize=_summarize_unscrew),
+    "adp_tip_to_tube": TaskSpec(factory=_create_adp_tip_to_tube_task, summarize=_summarize_adp_tip_to_tube),
 }
 
-# 创建任务的函数，根据 TaskRequest 中的任务名称从 TASK_REGISTRY 中获取对应的工厂函数来创建任务对象
+
+# ---------- 公共 API ----------
 def create_task(request: TaskRequest):
     try:
         spec = TASK_REGISTRY[request.task]
@@ -299,7 +421,7 @@ def create_task(request: TaskRequest):
         raise ValueError(f"Unknown task: {request.task}") from exc
     return spec.factory(request)
 
-# 总结任务元数据的函数，根据任务名称从 TASK_REGISTRY 中获取对应的概要函数来总结元数据
+
 def summarize_metadata(task_name: str, metadata: dict[str, Any]) -> dict[str, Any]:
     try:
         spec = TASK_REGISTRY[task_name]
@@ -307,11 +429,14 @@ def summarize_metadata(task_name: str, metadata: dict[str, Any]) -> dict[str, An
         raise ValueError(f"Unknown task: {task_name}") from exc
     return spec.summarize(metadata)
 
-# 获取所有注册的任务名称的函数
+
 def task_names() -> tuple[str, ...]:
     return tuple(TASK_REGISTRY.keys())
 
+
+# ---------- 导出 ----------
 __all__ = [
+    # 原有任务类
     "BimanualUnscrewTask",
     "BimanualUnscrewTaskConfig",
     "IKConfig",
@@ -323,11 +448,27 @@ __all__ = [
     "PipetteTimingConfig",
     "PipetteTipTargetConfig",
     "PipetteTubeTargetConfig",
+    "VisualServoConfig",
+    "WaypointSettleConfig",
+    # 新增 ADP 任务相关
+    "AdpTipToTubeTask",
+    "AdpTipToTubeTaskConfig",
+    "AdpTimingConfig",
+    "AdpIKConfig",
+    "AdpWaypointSettleConfig",
+    "AdpVisualServoConfig",
+    "AdpGripperSettings",
+    "AdpSceneQuery",
+    "AdpTargetBuilder",
+    "AdpTrashConfig",
+    "AdpPipetteModelConfig",
+    "AdpTipTargetConfig",
+    "AdpTubeTargetConfig",
+    "AdpMetadataBuilder",
+    # 通用
     "TASK_REGISTRY",
     "TaskRequest",
     "TaskSpec",
-    "VisualServoConfig",
-    "WaypointSettleConfig",
     "create_task",
     "summarize_metadata",
     "task_names",
