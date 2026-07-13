@@ -1,0 +1,131 @@
+{
+  "_description": "ADP scene reset: robot arm joints keep reset_default.json posture, the second UR5e gripper holds the ADP-10mL pump with the same gripper-to-pipette relative pose captured after pipette_grasp.py, the centrifuge tube is seated in the 10-slot rack, the separated cap is beside the rack, the pump has no mounted tip, and one pipette tip is randomized using the reset_single_tube_random.json slot layout.",
+  "_scene_xml": "model/scenes/scene_mujoco_fast_tubes_adp_pipette_grasped.xml",
+  "_held_by": {
+    "arm": "second",
+    "gripper_body": "2f85_1base",
+    "pipette_body": "pipette_free",
+    "weld": "pipette_gripper_weld"
+  },
+  "_adp_pipette": {
+    "mesh": "air_pump",
+    "asset": "assets/tool/Electronic_pipette/ADP-10mLAirDisplacementPump.STL",
+    "body": "pipette_free",
+    "tip_mount_site": "adp_tip_mount_site",
+    "tip_end_site": "piptip_site",
+    "mounted_tip": null
+  },
+  "_tip_box": {
+    "body": "tipbox/tip_box",
+    "tip_joint": "pipette_tip_joint_01",
+    "tip_body": "pipette_tip_box",
+    "tips": "one free pipette tip randomized among tip box slots"
+  },
+  "actuators": {
+    "joint0_ctrl": 0.0,
+    "shoulder_pan": 0.0,
+    "shoulder_lift": -1.57,
+    "elbow": 1.57,
+    "wrist_1": -1.57,
+    "wrist_2": -1.57,
+    "wrist_3": 0.0,
+    "ur5e1_shoulder_pan": 3.14,
+    "ur5e1_shoulder_lift": -1.57,
+    "ur5e1_elbow": 1.57,
+    "ur5e1_wrist_1": -1.57,
+    "ur5e1_wrist_2": -1.57,
+    "ur5e1_wrist_3": 0.0,
+    "2f85:fingers_actuator": 0.0,
+    "2f85_1fingers_actuator": 255.0
+  },
+  "joints": {
+    "2f85_1right_driver_joint": 0.7885418323845392,
+    "2f85_1right_coupler_joint": 0.0004277670938564313,
+    "2f85_1right_spring_link_joint": 0.7858438158313121,
+    "2f85_1right_follower_joint": -0.7691262475027587,
+    "2f85_1left_driver_joint": 0.7885412740120755,
+    "2f85_1left_coupler_joint": 0.00042967348435673104,
+    "2f85_1left_spring_link_joint": 0.7858309041368411,
+    "2f85_1left_follower_joint": -0.7691908115112044
+  },
+  "free_joints": {
+    "centrifuge_50ml_screw_joint_1": {
+      "pos": [0.0, -3.018, 0.4],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "centrifuge_50ml_screw_cap_joint_1": {
+      "pos": [0.12, -3.03, 0.407],
+      "quat": [0.0, 1.0, 0.0, 0.0]
+    },
+    "pipette_joint": {
+      "pos": [-0.27678154847853736, -3.2735267214481465, 0.7819789779664496],
+      "quat": [-0.5003616893506706, -0.49999388858794325, -0.49995063014461594, 0.4996935647202713]
+    }
+  },
+  "eq_active": {
+    "centrifuge_50ml_screw_cap_weld_1": false,
+    "pipette_gripper_weld": true
+  },
+  "random_single_free_joint": {
+    "active_joint": "pipette_tip_joint_01",
+    "joints": [
+      "pipette_tip_joint_01"
+    ],
+    "inactive_pose": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "slots": [
+      {
+        "name": "tip_slot_01",
+        "pos": [-0.08, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_02",
+        "pos": [-0.075, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_03",
+        "pos": [-0.07, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_04",
+        "pos": [-0.065, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_05",
+        "pos": [-0.06, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_06",
+        "pos": [-0.055, -2.913, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_07",
+        "pos": [-0.08, -2.910, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_08",
+        "pos": [-0.075, -2.910, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      {
+        "name": "tip_slot_09",
+        "pos": [-0.07, -2.910, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      },
+     {
+        "name": "tip_slot_10",
+        "pos": [-0.065, -2.910, 0.446],
+        "quat": [1.0, 0.0, 0.0, 0.0]
+      }
+    ]
+  }
+}
