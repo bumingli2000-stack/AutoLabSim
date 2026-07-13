@@ -1,0 +1,125 @@
+{
+  "_description": "Static reset for pipette grasped by second UR5e with detachable tip via weld. Captured from final frame of pipette_grasp.py.",
+  "_source_xml": "model/scenes/scene_mujoco_fast_tubes_pipette_grasped.xml",
+  "_source_episode": "data/episodes/pipette_grasp_batch/episode_000_seed_0000/episode.npz",
+  "_source_frame": "last",
+  "_held_by": {
+    "arm": "second",
+    "gripper_body": "2f85_1base",
+    "pipette_body": "pipette_free",
+    "weld": "pipette_gripper_weld"
+  },
+  "_mounted_tip": {
+    "body": "pipette_mounted_tip",
+    "mount_site": "mounted_tip/mount_site",
+    "tip_end_site": "mounted_tip/tip_end_site",
+    "attached_to": "pipette_free",
+    "weld": "pipette_tip_weld"
+  },
+  "actuators": {
+    "joint0_ctrl": 5.787550131437565e-13,
+    "shoulder_pan": 0.5927317897109519,
+    "shoulder_lift": -1.5639693045964207,
+    "elbow": 1.0677697911655948,
+    "wrist_1": -1.04339202508757,
+    "wrist_2": -1.5288488042417765,
+    "wrist_3": 2.1722608969109123,
+    "ur5e1_shoulder_pan": 3.333446679911621,
+    "ur5e1_shoulder_lift": -1.3171142281297843,
+    "ur5e1_elbow": 2.440893311580873,
+    "ur5e1_wrist_1": -4.018757492788328,
+    "ur5e1_wrist_2": -0.21029832390698378,
+    "ur5e1_wrist_3": -0.20982569187103522,
+    "2f85:fingers_actuator": 255.0,
+    "2f85_1fingers_actuator": 255.0
+  },
+  "joints": {
+    "shoulder_pan": 0.5927317897109519,
+    "shoulder_lift": -1.5639693045964207,
+    "elbow": 1.0677697911655948,
+    "wrist_1": -1.04339202508757,
+    "wrist_2": -1.5288488042417765,
+    "wrist_3": 2.1722608969109123,
+    "2f85:right_driver_joint": 0.7885523578143142,
+    "2f85:right_coupler_joint": 0.00042903436650555725,
+    "2f85:right_spring_link_joint": 0.7858438725949785,
+    "2f85:right_follower_joint": -0.7691846007616701,
+    "2f85:left_driver_joint": 0.788553491135835,
+    "2f85:left_coupler_joint": 0.0004275481241802428,
+    "2f85:left_spring_link_joint": 0.7858596301845309,
+    "2f85:left_follower_joint": -0.7691269936537695,
+    "ur5e1_shoulder_pan": 3.333446679911621,
+    "ur5e1_shoulder_lift": -1.3171142281297843,
+    "ur5e1_elbow": 2.440893311580873,
+    "ur5e1_wrist_1": -4.018757492788328,
+    "ur5e1_wrist_2": -0.21029832390698378,
+    "ur5e1_wrist_3": -0.20982569187103522,
+    "2f85_1right_driver_joint": 0.6670548993283476,
+    "2f85_1right_coupler_joint": 0.0002890091649777923,
+    "2f85_1right_spring_link_joint": 0.6607083591221157,
+    "2f85_1right_follower_joint": -0.6570260061924784,
+    "2f85_1left_driver_joint": 0.6670499694143089,
+    "2f85_1left_coupler_joint": 0.00030804075969098106,
+    "2f85_1left_spring_link_joint": 0.6606869575165917,
+    "2f85_1left_follower_joint": -0.6572988024921529,
+    "joint0": 5.787550131437565e-13,
+    "pippipette_ejector": -2.1632909216630047e-05,
+    "pippipette_button": 4.172770600649196e-05,
+    "pipknob": -0.0035884431340683105
+  },
+  "free_joints": {
+    "centrifuge_50ml_screw_joint_1": {
+      "pos": [0.036231385828102265, -3.019250360031736, 0.3997211034830392],
+      "quat": [0.9998170524359734, -0.015422753552622067, 0.007593369157564608, -0.008386958682058254]
+    },
+    "centrifuge_50ml_screw_cap_joint_1": {
+      "pos": [0.18262842542359278, -3.05966434696128, 0.407267502919638],
+      "quat": [-8.218505616831283e-06, 0.9999432745394515, 0.010651180017954287, 2.9442218748843416e-08]
+    },
+    "pipette_joint": {
+      "pos": [-0.013948389542634165, -3.0230974139367404, 0.7384763063186824],
+      "quat": [0.9995575251713799, 0.01482059212300877, 0.024943672220397554, -0.006551117351343548]
+    },
+    "pipette_mounted_tip_joint": {
+      "pos": [-0.013948389542634165, -3.0230974139367404, 0.7384763063186824],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_01": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_02": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_03": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_04": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_05": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_06": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_07": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    },
+    "pipette_tip_joint_08": {
+      "pos": [10.0, 10.0, -10.0],
+      "quat": [1.0, 0.0, 0.0, 0.0]
+    }
+  },
+  "eq_active": {
+    "pipette_tip_weld": true,
+    "pipette_gripper_weld": true,
+    "centrifuge_50ml_screw_cap_weld_1": false
+  }
+}
