@@ -1,0 +1,145 @@
+"""Episode metadata construction for the ADP tip-to-tube workflow."""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any
+
+import numpy as np
+
+from ...scene import free_joint_pose, site_pose
+from ...task_target import PlannedTaskTarget
+from ..common import json_safe
+
+
+class AdpMetadataBuilder:
+    """Build episode metadata for the ADP tip-to-tube task.
+
+    This class extracts and summarizes relevant information from the completed
+    trajectory, including waypoints, attachments, target selection, and final state.
+    """
+
+    def __init__(self, env: Any, runtime: Any) -> None:
+        """Initialize the metadata builder.
+
+        Args:
+            env: The MuJoCo environment instance.
+            runtime: The task configuration object (AdpTipToTubeTaskConfig).
+        """
+        self.env = env
+        self.runtime = runtime
+
+    def build(
+        self,
+        tip_hover_targets: tuple,
+        mount_plan: list[PlannedTaskTarget],
+        retract_plan: list[PlannedTaskTarget],
+        tube_hover_plan: list[PlannedTaskTarget],
+        tube_near_plan: list[PlannedTaskTarget],
+        tube_return_plan: list[PlannedTaskTarget],
+        trash_plan: list[PlannedTaskTarget],
+        release_plan: list[PlannedTaskTarget],
+        home_plan: list[PlannedTaskTarget],
+        *,
+        tip_attachment: dict[str, np.ndarray] | None,
+        tip_target_info: dict[str, Any] | None,
+        tube_target_info: dict[str, Any] | None,
+        num_steps: int,
+    ) -> dict[str, Any]:
+        """Build the complete metadata dictionary.
+
+        Args:
+            tip_hover_targets: The two TaskTarget objects used for tip hover.
+            mount_plan: Planned targets for the tip mount (downward) phase.
+            retract_plan: Planned targets for tip retract (upward) phase.
+            tube_hover_plan: Planned targets for tube hover phase.
+            tube_near_plan: Planned targets for tube near (lower to opening) phase.
+            tube_return_plan: Planned targets for lifting back above the tube.
+            trash_plan: Planned targets for trash hover phase.
+            release_plan: Planned targets for tip release (upward move).
+            home_plan: Planned targets for returning home.
+            tip_attachment: Mapping of tip attachment (joint->site) if captured.
+            tip_target_info: Information about the selected tip.
+            tube_target_info: Information about the selected tube (including near position).
+            num_steps: Total number of control steps in the episode.
+
+        Returns:
+            A dictionary containing the complete metadata.
+        """
+        final_obs = self.env.get_observation()
+
+        # Get final pipette free joint pose
+        pipette_pos, pipette_quat = free_joint_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            self.runtime.pipette.pipette_joint,
+        )
+
+        # Get final pipette tip site pose
+        final_tip_pos, final_tip_quat = site_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            self.runtime.pipette.pipette_tip_site,
+        )
+
+        # Helper to convert TaskTarget to metadata dict if it has to_metadata
+        def target_to_metadata(obj):
+            if hasattr(obj, "to_metadata"):
+                return obj.to_metadata()
+            elif isinstance(obj, dict):
+                return obj
+            else:
+                return str(obj)
+
+        # Build metadata
+        metadata = {
+            "format": "autolabsim_npz_v2",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "episode_index": self.runtime.episode_index,
+            "reset_seed": self.runtime.seed,
+            "steps": int(num_steps),
+            "task": "adp_tip_to_tube",
+            "model_path": str(self.runtime.env.model_path),
+            "reset_config": str(self.runtime.env.reset_config),
+            "arm": self.runtime.arm,
+            "pipette_joint": self.runtime.pipette.pipette_joint,
+            "pipette_tip_site": self.runtime.pipette.pipette_tip_site,
+            "reset_info": self.env.last_reset_info,
+            "slot_index": self.env.last_reset_info.get(
+                "random_single_free_joint", {}
+            ).get("slot_index"),
+            "slot_name": self.env.last_reset_info.get(
+                "random_single_free_joint", {}
+            ).get("slot_name"),
+            # Waypoints
+            "tip_hover_waypoints": [
+                target_to_metadata(t) for t in tip_hover_targets
+            ],
+            "tip_mount_waypoints": [item.to_metadata() for item in mount_plan],
+            "tip_retract_waypoints": [item.to_metadata() for item in retract_plan],
+            "tube_hover_waypoints": [item.to_metadata() for item in tube_hover_plan],
+            "tube_near_waypoints": [item.to_metadata() for item in tube_near_plan],
+            "tube_return_waypoints": [
+                item.to_metadata() for item in tube_return_plan
+            ],
+            "trash_waypoints": [item.to_metadata() for item in trash_plan],
+            "release_waypoints": [item.to_metadata() for item in release_plan],
+            "home_waypoints": [item.to_metadata() for item in home_plan],
+            # Target info
+            "tip_target": json_safe(tip_target_info),
+            "tube_target": json_safe(tube_target_info),
+            # Attachments
+            "tip_attachment": json_safe(tip_attachment),
+            # Final state
+            "final_time": float(final_obs["time"]),
+            "final_state_summary": {
+                "pipette_pos": pipette_pos.tolist(),
+                "pipette_quat": pipette_quat.tolist(),
+                "pipette_tip_site_pos": final_tip_pos.tolist(),
+                "pipette_tip_site_quat": final_tip_quat.tolist(),
+            },
+        }
+
+        return metadata
