@@ -394,6 +394,7 @@ def _summarize_adp_tip_to_tube(metadata: dict[str, Any]) -> dict[str, Any]:
     )
     return {
         "metadata_found": True,
+        "success": metadata.get("success"),
         "steps": metadata["steps"],
         "slot_index": metadata.get("slot_index"),
         "slot_name": metadata.get("slot_name"),

@@ -476,7 +476,7 @@ class AdpTipToTubeTask(AutoLabTask):
 
         arrays = recorder.to_arrays()
         metadata = self.metadata_builder.build(
-            tip_hover_targets=tip_hover_targets,
+            tip_hover_targets=tuple(plan_hover),
             mount_plan=plan_mount,
             retract_plan=plan_retract,
             tube_hover_plan=plan_tube_hover,
@@ -488,6 +488,8 @@ class AdpTipToTubeTask(AutoLabTask):
             tip_attachment=tip_mount.tip_attachment.to_mapping(),
             tip_target_info=self.target_builder.tip_target_info,
             tube_target_info=self.target_builder.tube_target_info,
+            visual_servo_events=self.visual_servo_events,
+            execution_site_errors=self.execution_site_errors,
             num_steps=arrays["qpos"].shape[0],
         )
         self.save_episode(self.runtime.out_dir, metadata, arrays)

@@ -44,6 +44,8 @@ class AdpMetadataBuilder:
         tip_attachment: dict[str, np.ndarray] | None,
         tip_target_info: dict[str, Any] | None,
         tube_target_info: dict[str, Any] | None,
+        visual_servo_events: list[dict[str, Any]],
+        execution_site_errors: list[dict[str, Any]],
         num_steps: int,
     ) -> dict[str, Any]:
         """Build the complete metadata dictionary.
@@ -61,6 +63,8 @@ class AdpMetadataBuilder:
             tip_attachment: Mapping of tip attachment (joint->site) if captured.
             tip_target_info: Information about the selected tip.
             tube_target_info: Information about the selected tube (including near position).
+            visual_servo_events: Closed-loop correction events collected during execution.
+            execution_site_errors: Site target errors collected during execution.
             num_steps: Total number of control steps in the episode.
 
         Returns:
@@ -84,6 +88,30 @@ class AdpMetadataBuilder:
             self.runtime.pipette.pipette_tip_site,
         )
 
+        planned_waypoints = (
+            list(tip_hover_targets)
+            + list(mount_plan)
+            + list(retract_plan)
+            + list(tube_hover_plan)
+            + list(tube_near_plan)
+            + list(tube_return_plan)
+            + list(trash_plan)
+            + list(release_plan)
+            + list(home_plan)
+        )
+        ik_success_values = [
+            bool(getattr(item, "ik_success"))
+            for item in planned_waypoints
+            if hasattr(item, "ik_success")
+        ]
+        success = (
+            bool(ik_success_values)
+            and all(ik_success_values)
+            and tip_attachment is not None
+            and tip_target_info is not None
+            and tube_target_info is not None
+        )
+
         # Helper to convert TaskTarget to metadata dict if it has to_metadata
         def target_to_metadata(obj):
             if hasattr(obj, "to_metadata"):
@@ -100,6 +128,8 @@ class AdpMetadataBuilder:
             "episode_index": self.runtime.episode_index,
             "reset_seed": self.runtime.seed,
             "steps": int(num_steps),
+            "success": bool(success),
+            "task_success": bool(success),
             "task": "adp_tip_to_tube",
             "model_path": str(self.runtime.env.model_path),
             "reset_config": str(self.runtime.env.reset_config),
@@ -132,6 +162,24 @@ class AdpMetadataBuilder:
             "tube_target": json_safe(tube_target_info),
             # Attachments
             "tip_attachment": json_safe(tip_attachment),
+            "visual_servo": {
+                "enabled": self.runtime.visual_servo.visual_servo_enabled,
+                "max_iters": (
+                    self.runtime.visual_servo.visual_servo_max_iters
+                ),
+                "steps": self.runtime.visual_servo.visual_servo_steps,
+                "pos_tol": self.runtime.visual_servo.visual_servo_pos_tol,
+                "rot_tol": self.runtime.visual_servo.visual_servo_rot_tol,
+                "gain": self.runtime.visual_servo.visual_servo_gain,
+                "integral_gain": (
+                    self.runtime.visual_servo.visual_servo_integral_gain
+                ),
+                "max_correction": (
+                    self.runtime.visual_servo.visual_servo_max_correction
+                ),
+                "events": json_safe(visual_servo_events),
+            },
+            "execution_site_errors": json_safe(execution_site_errors),
             # Final state
             "final_time": float(final_obs["time"]),
             "final_state_summary": {
