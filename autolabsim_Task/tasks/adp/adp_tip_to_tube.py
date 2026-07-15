@@ -474,7 +474,7 @@ class AdpTipToTubeTask(AutoLabTask):
             no_tip_ctx,
         )
 
-        arrays = recorder.to_arrays()
+        arrays = self._prepare_lerobot_arrays(recorder.to_arrays())
         metadata = self.metadata_builder.build(
             tip_hover_targets=tuple(plan_hover),
             mount_plan=plan_mount,
@@ -490,12 +490,61 @@ class AdpTipToTubeTask(AutoLabTask):
             tube_target_info=self.target_builder.tube_target_info,
             visual_servo_events=self.visual_servo_events,
             execution_site_errors=self.execution_site_errors,
+            episode_arrays=self._episode_array_metadata(arrays),
+            lerobot_conversion=self._lerobot_conversion_metadata(arrays),
             num_steps=arrays["qpos"].shape[0],
         )
         self.save_episode(self.runtime.out_dir, metadata, arrays)
         return metadata
 
     # ---------- Helpers ----------
+    def _prepare_lerobot_arrays(
+        self,
+        arrays: dict[str, np.ndarray],
+    ) -> dict[str, np.ndarray]:
+        """Normalize ADP episode arrays for the LeRobot ACT converter."""
+
+        prepared = dict(arrays)
+        steps = int(prepared["action"].shape[0])
+        prepared["time"] = (
+            np.arange(steps, dtype=np.float64) * float(self.env.control_dt)
+        )
+        return prepared
+
+    def _episode_array_metadata(
+        self,
+        arrays: dict[str, np.ndarray],
+    ) -> dict[str, dict[str, Any]]:
+        return {
+            key: {
+                "shape": [int(dim) for dim in value.shape],
+                "dtype": str(value.dtype),
+            }
+            for key, value in arrays.items()
+        }
+
+    def _lerobot_conversion_metadata(
+        self,
+        arrays: dict[str, np.ndarray],
+    ) -> dict[str, Any]:
+        camera_keys = [
+            f"image_{camera}"
+            for camera in self.runtime.cameras
+            if f"image_{camera}" in arrays
+        ]
+        return {
+            "converter": "scripts/convert_autolabsim_to_lerobot_act.py",
+            "state_key": "ctrl",
+            "action_key": "action",
+            "action_offset": 1,
+            "time_key": "time",
+            "control_dt": float(self.env.control_dt),
+            "fps": int(round(1.0 / float(self.env.control_dt))),
+            "time_aligned_to_control_dt": True,
+            "camera_keys": camera_keys,
+            "requires_images": True,
+        }
+
     def _update_mounted_tip_end_offset(self) -> None:
         if self.target_builder.tip_target_info is None:
             return
