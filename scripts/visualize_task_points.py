@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.math3d import gripper_quat_from_axes, mat_to_quat, quat_to_mat, unit
-from autolabsim.grasp_pose import LocalGraspPose, local_grasp_to_world_target
-from autolabsim.scene import (
+from autolabsim_Task.math3d import gripper_quat_from_axes, mat_to_quat, quat_to_mat, unit
+from autolabsim_Task.grasp_pose import LocalGraspPose, local_grasp_to_world_target
+from autolabsim_Task.scene import (
     actuator_id,
     body_pos,
     capture_free_joint_state,
@@ -24,8 +24,8 @@ from autolabsim.scene import (
     free_joint_addresses,
     restore_free_joint_state,
 )
-from autolabsim.reset_config import apply_reset_config, load_reset_config
-from autolabsim.tasks.common import ARM_DEFAULTS, cap_body_from_tube_joint, random_reset_info
+from autolabsim_Task.reset_config import apply_reset_config, load_reset_config
+from autolabsim_Task.tasks.common import ARM_DEFAULTS, cap_body_from_tube_joint, random_reset_info
 from AutoLabSim.autolabsim.tasks.pipette_grasp.pipette_grasp import PipetteHandleGraspConfig, PipetteModelConfig, PipetteTipTargetConfig
 
 TASK_DEFAULTS = {

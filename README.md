@@ -128,6 +128,13 @@ python3 scripts/generate_pipette_grasp_batch.py \
   --cameras overview_camera,wrist_cam,wrist_cam1 \
   --out-root data/episodes/pipette_grasp_batch
 ```
+```bash
+python3 scripts/generate_adp_tip_to_tube_batch.py \
+  --count 1 \
+  --with-images \
+  --cameras overview_camera,wrist_cam,wrist_cam1 \
+  --out-root data/episodes/adp_tip_batch
+```
 
 ### Export Episode Video
 
@@ -146,6 +153,58 @@ python3 scripts/export_episode_images.py \
   --format mp4 \
   --fps 20
 ```
+
+```bash
+python3 scripts/export_episode_images.py \
+  data/episodes/adp_tip_batch \
+  --camera overview_camera,wrist_cam,wrist_cam1 \
+  --format mp4 \
+  --fps 20
+```
+
+# 数据格式转换，用于ACT训练
+# 少量转换用于验证
+python scripts/convert_autolabsim_to_lerobot_act.py \
+  --input-root data/episodes/screw_cap_batch \
+  --output-root data/lerobot/act_smoke \
+  --repo-id local/autolabsim_screw_cap_act_smoke \
+  --require-success \
+  --max-episodes 2 \
+  --overwrite
+# 全量转换
+python scripts/convert_autolabsim_to_lerobot_act.py \
+  --input-root data/episodes/screw_cap_batch \
+  --output-root data/lerobot/act \
+  --repo-id local/autolabsim_screw_cap_act \
+  --require-success \
+  --overwrite
+
+# ACT训练
+lerobot-train  --dataset.repo_id=local/autolabsim_screw_cap_act \
+  --dataset.root="$PWD/data/lerobot/act" \
+  --dataset.video_backend=pyav \
+  --policy.type=act \
+  --policy.device=cuda \
+  --policy.push_to_hub=false \
+  --policy.chunk_size=50 \
+  --policy.n_action_steps=50 \
+  --output_dir="$PWD/outputs/lerobot_act_screw_300k" \
+  --job_name=act_screw_300k \
+  --batch_size=8 \
+  --num_workers=8 \
+  --steps=300000 \
+  --log_freq=100 \
+  --save_freq=5000 \
+  --eval_freq=0 \
+  --wandb.enable=false   2>&1 | tee outputs/act_screw_300k.log
+
+# 部署验证
+python scripts/replay_episode_tracking_error.py \
+  --episode-dir data/episodes/screw_cap_batch/episode_000_seed_0000 \
+  --output-dir outputs/replay_tracking/episode_000 \
+  --runtime-adapter-script scripts/deploy_lerobot_act_autolabsim.py \
+  --plot
+
 # GitHub Upload, Authentication and Team Collaboration
 
 本项目 GitHub 仓库信息：

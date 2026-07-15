@@ -20,10 +20,10 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
-from autolabsim.math3d import gripper_quat_from_axes, normalize_quat, unit
-from autolabsim.planner import TaskTargetPlanner
-from autolabsim.scene import site_pose
-from autolabsim.task_target import FrameRef, GripperCommand, TaskTarget
+from autolabsim_Task.math3d import gripper_quat_from_axes, normalize_quat, unit
+from autolabsim_Task.planner import TaskTargetPlanner
+from autolabsim_Task.scene import site_pose
+from autolabsim_Task.task_target import FrameRef, GripperCommand, TaskTarget
 
 
 ArmDefaults = Mapping[str, Mapping[str, Any]]

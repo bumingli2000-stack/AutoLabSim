@@ -5,8 +5,8 @@ from typing import Any, Callable
 import numpy as np
 
 from ..mujoco_env import EnvConfig
-from autolabsim.tasks.screw_cap.screw_cap import BimanualUnscrewTask, BimanualUnscrewTaskConfig
-from autolabsim.tasks.pipette_grasp.pipette_grasp import (
+from autolabsim_Task.tasks.screw_cap.screw_cap import BimanualUnscrewTask, BimanualUnscrewTaskConfig
+from autolabsim_Task.tasks.pipette_grasp.pipette_grasp import (
     IKConfig,
     PipetteGraspTask,
     PipetteGraspTaskConfig,

@@ -9,7 +9,7 @@ from typing import Any
 
 import numpy as np
 
-from autolabsim.scene import free_joint_pose, site_pose
+from autolabsim_Task.scene import free_joint_pose, site_pose
 from ..common import random_reset_info
 
 '''负责查询：

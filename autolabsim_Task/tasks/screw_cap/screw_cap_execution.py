@@ -21,15 +21,15 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
-from autolabsim.executor import TaskTargetExecutor
-from autolabsim.math3d import gripper_quat_from_axes, unit
-from autolabsim.motion_context import ExecutionContext, PlanningContext
-from autolabsim.planner import TaskTargetPlanner
-from autolabsim.scene import actuator_id, joint_qpos_ids, site_pose
-from autolabsim.screw import ScrewCapSystem
-from autolabsim.task_target import PlannedTaskTarget, TaskTarget
-from autolabsim.topp import Topp, ToppConfig
-from autolabsim.tasks.screw_cap.screw_cap_targets import ScrewCapTargetBuilder
+from autolabsim_Task.executor import TaskTargetExecutor
+from autolabsim_Task.math3d import gripper_quat_from_axes, unit
+from autolabsim_Task.motion_context import ExecutionContext, PlanningContext
+from autolabsim_Task.planner import TaskTargetPlanner
+from autolabsim_Task.scene import actuator_id, joint_qpos_ids, site_pose
+from autolabsim_Task.screw import ScrewCapSystem
+from autolabsim_Task.task_target import PlannedTaskTarget, TaskTarget
+from autolabsim_Task.topp import Topp, ToppConfig
+from autolabsim_Task.tasks.screw_cap.screw_cap_targets import ScrewCapTargetBuilder
 
 
 ArmDefaults = Mapping[str, Mapping[str, Any]]

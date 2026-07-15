@@ -21,8 +21,8 @@ from typing import Any
 
 import numpy as np
 
-from autolabsim.executor import TaskTargetExecutor
-from autolabsim.motion_context import (
+from autolabsim_Task.executor import TaskTargetExecutor
+from autolabsim_Task.motion_context import (
     ExecutionContext,
     ExecutionSettings,
     FixedJointState,

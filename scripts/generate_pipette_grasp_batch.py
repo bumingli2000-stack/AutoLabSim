@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.tasks.cli import main
+from autolabsim_Task.tasks.cli import main
 
 # 定义一组默认参数，然后传入cli中的 main 函数中执行
 if __name__ == "__main__":

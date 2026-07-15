@@ -10,11 +10,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Sequence
 
-from autolabsim.scene import body_pos, free_joint_pos
-from autolabsim.screw import ScrewCapSystem
-from autolabsim.task_target import PlannedTaskTarget
+from autolabsim_Task.scene import body_pos, free_joint_pos
+from autolabsim_Task.screw import ScrewCapSystem
+from autolabsim_Task.task_target import PlannedTaskTarget
 from ..common import json_safe
-from autolabsim.tasks.screw_cap.screw_cap_scene import ScrewCapSceneState
+from autolabsim_Task.tasks.screw_cap.screw_cap_scene import ScrewCapSceneState
 
 
 class ScrewCapMetadataBuilder:

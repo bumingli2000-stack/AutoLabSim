@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from autolabsim.executor import TaskTargetExecutor
-from autolabsim.motion_context import (
+from autolabsim_Task.executor import TaskTargetExecutor
+from autolabsim_Task.motion_context import (
     ArmMotionConfig,
     ExecutionSettings,
     GripperSettings,
@@ -17,9 +17,9 @@ from autolabsim.motion_context import (
     SiteAttachment,
     VisualServoSettings,
 )
-from autolabsim.mujoco_env import EnvConfig
-from autolabsim.planner import TaskTargetPlanner
-from autolabsim.task_target import (
+from autolabsim_Task.mujoco_env import EnvConfig
+from autolabsim_Task.planner import TaskTargetPlanner
+from autolabsim_Task.task_target import (
     FrameRef,
     GripperCommand,
     PlannedTaskTarget,

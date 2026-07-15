@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from autolabsim.scene import free_joint_pose, site_pose
-from autolabsim.task_target import PlannedTaskTarget
+from autolabsim_Task.scene import free_joint_pose, site_pose
+from autolabsim_Task.task_target import PlannedTaskTarget
 from ..common import json_safe
 
 

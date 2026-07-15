@@ -1,0 +1,22 @@
+name: autolabsim-act
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pip>=24
+  - setuptools
+  - wheel
+  - ffmpeg
+  - pip:
+      - numpy==1.26.4
+      - opencv-python>=4.8,<5
+      - mujoco>=3.1,<4
+      - toppra>=0.6
+      - matplotlib>=3.8
+      - tqdm>=4.66
+      - tensorboard>=2.16
+      - imageio>=2.34
+      - imageio-ffmpeg>=0.5
+      - pytest>=8

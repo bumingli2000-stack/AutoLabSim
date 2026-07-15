@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.episode_io import load_episode
+from autolabsim_Task.episode_io import load_episode
 
 
 def rgb_to_bgr(image: np.ndarray) -> np.ndarray:

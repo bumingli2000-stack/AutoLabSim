@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.reset_config import apply_reset_config, load_reset_config
+from autolabsim_Task.reset_config import apply_reset_config, load_reset_config
 
 
 def add_sphere(mujoco, viewer, pos: np.ndarray, radius: float, rgba: np.ndarray) -> None:

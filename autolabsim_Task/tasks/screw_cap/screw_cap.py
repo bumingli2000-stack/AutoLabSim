@@ -39,13 +39,13 @@ from ...screw import ScrewCapSystem
 from ...task import AutoLabTask, TaskConfig
 from ...task_target import PlannedTaskTarget, TaskTarget
 from ..common import ARM_DEFAULTS
-from autolabsim.tasks.screw_cap.screw_cap_execution import (
+from autolabsim_Task.tasks.screw_cap.screw_cap_execution import (
     ScrewCapExecutionController,
     ScrewCapExecutionSettings,
 )
-from autolabsim.tasks.screw_cap.screw_cap_metadata import ScrewCapMetadataBuilder
-from autolabsim.tasks.screw_cap.screw_cap_scene import ScrewCapSceneQuery, ScrewCapSceneState
-from autolabsim.tasks.screw_cap.screw_cap_targets import ScrewCapTargetBuilder
+from autolabsim_Task.tasks.screw_cap.screw_cap_metadata import ScrewCapMetadataBuilder
+from autolabsim_Task.tasks.screw_cap.screw_cap_scene import ScrewCapSceneQuery, ScrewCapSceneState
+from autolabsim_Task.tasks.screw_cap.screw_cap_targets import ScrewCapTargetBuilder
 
 
 @dataclass(frozen=True)

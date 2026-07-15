@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from typing import Any
 import numpy as np
 
-from autolabsim.scene import body_pos, free_joint_pos
-from autolabsim.scene_profile import active_joint_fallback
+from autolabsim_Task.scene import body_pos, free_joint_pos
+from autolabsim_Task.scene_profile import active_joint_fallback
 from ..common import (
     cap_body_from_tube_joint,
     cap_joint_from_tube_joint,

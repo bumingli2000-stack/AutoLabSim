@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from autolabsim.tasks.cli import main
+from autolabsim_Task.tasks.cli import main
 
 
 def _has_seed_override(args: list[str]) -> bool:
