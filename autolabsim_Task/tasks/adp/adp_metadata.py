@@ -46,6 +46,8 @@ class AdpMetadataBuilder:
         tube_target_info: dict[str, Any] | None,
         visual_servo_events: list[dict[str, Any]],
         execution_site_errors: list[dict[str, Any]],
+        episode_arrays: dict[str, dict[str, Any]],
+        lerobot_conversion: dict[str, Any],
         num_steps: int,
     ) -> dict[str, Any]:
         """Build the complete metadata dictionary.
@@ -65,6 +67,8 @@ class AdpMetadataBuilder:
             tube_target_info: Information about the selected tube (including near position).
             visual_servo_events: Closed-loop correction events collected during execution.
             execution_site_errors: Site target errors collected during execution.
+            episode_arrays: NPZ array keys, shapes, and dtypes written for the episode.
+            lerobot_conversion: Conversion hints matching convert_autolabsim_to_lerobot_act.py.
             num_steps: Total number of control steps in the episode.
 
         Returns:
@@ -111,6 +115,14 @@ class AdpMetadataBuilder:
             and tip_target_info is not None
             and tube_target_info is not None
         )
+        conversion_metadata = dict(lerobot_conversion)
+        conversion_metadata.update(
+            self._lerobot_compatibility_metadata(
+                episode_arrays,
+                conversion_metadata,
+                success=bool(success),
+            )
+        )
 
         # Helper to convert TaskTarget to metadata dict if it has to_metadata
         def target_to_metadata(obj):
@@ -130,9 +142,18 @@ class AdpMetadataBuilder:
             "steps": int(num_steps),
             "success": bool(success),
             "task_success": bool(success),
+            "completed": bool(success),
             "task": "adp_tip_to_tube",
+            "task_text": (
+                "Use the ADP pipette to mount a tip, visit the centrifuge tube, "
+                "drop the tip over trash, and return home."
+            ),
             "model_path": str(self.runtime.env.model_path),
             "reset_config": str(self.runtime.env.reset_config),
+            "with_images": bool(self.runtime.with_images),
+            "cameras": list(self.runtime.cameras),
+            "episode_arrays": json_safe(episode_arrays),
+            "lerobot_conversion": json_safe(conversion_metadata),
             "arm": self.runtime.arm,
             "pipette_joint": self.runtime.pipette.pipette_joint,
             "pipette_tip_site": self.runtime.pipette.pipette_tip_site,
@@ -191,3 +212,113 @@ class AdpMetadataBuilder:
         }
 
         return metadata
+
+    def _lerobot_compatibility_metadata(
+        self,
+        episode_arrays: dict[str, dict[str, Any]],
+        conversion: dict[str, Any],
+        *,
+        success: bool,
+    ) -> dict[str, Any]:
+        """Summarize whether the emitted NPZ matches the ACT converter contract."""
+
+        state_key = str(conversion.get("state_key", "ctrl"))
+        action_key = str(conversion.get("action_key", "action"))
+        time_key = str(conversion.get("time_key", "time"))
+        action_offset = int(conversion.get("action_offset", 1))
+        camera_keys = tuple(
+            str(key) for key in conversion.get("camera_keys", ()) if key
+        )
+        requires_images = bool(conversion.get("requires_images", True))
+        if requires_images and not camera_keys:
+            camera_keys = tuple(f"image_{camera}" for camera in self.runtime.cameras)
+
+        required_keys = (state_key, action_key, time_key, *camera_keys)
+        missing_keys = [key for key in required_keys if key not in episode_arrays]
+
+        state_shape = self._array_shape(episode_arrays, state_key)
+        action_shape = self._array_shape(episode_arrays, action_key)
+        time_shape = self._array_shape(episode_arrays, time_key)
+        raw_frames = action_shape[0] if action_shape else None
+        converted_frames = (
+            int(raw_frames) - action_offset if raw_frames is not None else None
+        )
+
+        camera_checks: dict[str, dict[str, Any]] = {}
+        for key in camera_keys:
+            shape = self._array_shape(episode_arrays, key)
+            dtype = self._array_dtype(episode_arrays, key)
+            camera_checks[key] = {
+                "shape": shape,
+                "dtype": dtype,
+                "is_4d": len(shape) == 4,
+                "channel_count_ok": len(shape) == 4 and shape[-1] in (1, 3, 4),
+                "dtype_uint8": self._is_dtype(dtype, np.uint8),
+            }
+
+        frame_counts = {
+            key: self._array_shape(episode_arrays, key)[0]
+            for key in required_keys
+            if self._array_shape(episode_arrays, key)
+        }
+        lengths_match = (
+            not missing_keys
+            and len(frame_counts) == len(required_keys)
+            and len(set(frame_counts.values())) == 1
+        )
+        checks = {
+            "metadata_success_true": bool(success),
+            "required_npz_keys_present": not missing_keys,
+            "state_is_2d": len(state_shape) == 2,
+            "action_is_2d": len(action_shape) == 2,
+            "time_is_1d": len(time_shape) == 1,
+            "frame_counts_match": lengths_match,
+            "has_frames_after_action_offset": (
+                converted_frames is not None and converted_frames > 0
+            ),
+            "images_present_when_required": (
+                (not requires_images) or bool(camera_keys)
+            ),
+            "camera_arrays_ok": all(
+                item["is_4d"]
+                and item["channel_count_ok"]
+                and item["dtype_uint8"]
+                for item in camera_checks.values()
+            ),
+            "time_aligned_to_control_dt": bool(
+                conversion.get("time_aligned_to_control_dt", False)
+            ),
+        }
+
+        return {
+            "compatible": all(checks.values()),
+            "checks": checks,
+            "required_npz_keys": list(required_keys),
+            "missing_npz_keys": missing_keys,
+            "frame_counts": frame_counts,
+            "raw_frames": raw_frames,
+            "converted_frames": converted_frames,
+            "camera_checks": camera_checks,
+        }
+
+    @staticmethod
+    def _array_shape(
+        episode_arrays: dict[str, dict[str, Any]],
+        key: str,
+    ) -> list[int]:
+        shape = episode_arrays.get(key, {}).get("shape", [])
+        return [int(dim) for dim in shape] if isinstance(shape, list) else []
+
+    @staticmethod
+    def _array_dtype(
+        episode_arrays: dict[str, dict[str, Any]],
+        key: str,
+    ) -> str:
+        return str(episode_arrays.get(key, {}).get("dtype", ""))
+
+    @staticmethod
+    def _is_dtype(dtype: str, expected: Any) -> bool:
+        try:
+            return np.dtype(dtype) == np.dtype(expected)
+        except TypeError:
+            return False
