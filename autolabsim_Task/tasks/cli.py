@@ -86,6 +86,7 @@ def build_batch_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tip-hover-steps", type=int, default=None, help="Motion steps for moving the ADP to the selected tip hover pose.")
     parser.add_argument("--tip-length", type=float, default=None, help="Tip body length used by supported pipette/ADP tasks.")
     parser.add_argument("--tip-mount-offset", default=None, help="Mounted-tip target offset in the selected tip mount-site frame as 'x y z'.")
+    parser.add_argument("--tip-mount-axis-step", type=float, default=None, help="Maximum ADP mount descent step along the selected tip axis, in meters.")
     parser.add_argument("--tip-mount-target-euler", default=None, help="Mounted-tip target XYZ Euler angles in the selected tip mount-site frame.")
     parser.add_argument("--parking-weld", default=None, help="Optional parking weld equality name released after grasp.")
     parser.add_argument("--vertical-quat", default=None, help="Target lifted pipette quaternion as 'w x y z'.")

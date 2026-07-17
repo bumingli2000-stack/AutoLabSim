@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 
 from ...executor import TaskTargetExecutor
+from ...math3d import quat_to_mat
 from ...motion_context import (
     ExecutionContext,
     ExecutionSettings,
@@ -28,7 +29,6 @@ from ...scene import (
     actuator_id,
     capture_free_joint_state,
     capture_site_attachment,
-    joint_qpos_ids,
     restore_free_joint_state,
     site_pose,
 )
@@ -123,6 +123,11 @@ class TipMountResult:
     mount_down_plan: list[PlannedTaskTarget]
     tip_joint: str
     tip_attachment: SiteAttachment
+
+
+class _DiscardingRecorder:
+    def record(self, *_args: Any, **_kwargs: Any) -> None:
+        return None
 
 
 # ---------- Main task ----------
@@ -309,6 +314,7 @@ class AdpTipToTubeTask(AutoLabTask):
                 attachments=tool_holder.follow(),
             ),
         )
+        self._validate_tip_hover_alignment()
 
         # 4. Tip mount (down)
         mount_targets = self.target_builder.tip_mount_down_targets(self.runtime.arm)
@@ -317,23 +323,33 @@ class AdpTipToTubeTask(AutoLabTask):
             tool_holder,
             default_gripper_value=self.runtime.gripper.close_value,
         )
+        for item in plan_mount:
+            item.steps = max(1, int(self.runtime.timing.steps_per_segment))
         mount_context = self._execution_context(
             fixed_joint_states=((target_tip_joint, target_tip_state),),
             attachments=tool_holder.follow(),
         )
-        self._execute_kinematic_mount_plan(
-            recorder,
-            plan_mount,
-            "tip_mount",
-            mount_context,
-        )
-        self._record_kinematic_hold(
+        if self.runtime.visual_servo.visual_servo_enabled:
+            self._execute_tip_mount_axis_servo(
+                recorder,
+                plan_mount,
+                mount_context,
+            )
+        else:
+            self.executor.execute(
+                recorder,
+                plan_mount,
+                "tip_mount",
+                mount_context,
+            )
+        self.executor.hold_action(
             recorder,
             np.asarray(plan_mount[-1].action, dtype=np.float64),
             self.runtime.timing.tip_mount_settle_steps,
             "tip_mount_settle",
             mount_context,
         )
+        self._validate_tip_mount_alignment()
         tip_mount = self._capture_tip_attachment(tool_holder)
 
         # 5. Tip retract (up)
@@ -605,6 +621,169 @@ class AdpTipToTubeTask(AutoLabTask):
             tip_attachment=tip_attachment,
         )
 
+    def _execute_tip_mount_axis_servo(
+        self,
+        recorder: EpisodeRecorder,
+        plan: list[PlannedTaskTarget],
+        context: ExecutionContext,
+    ) -> None:
+        current_action = np.asarray(self.env.data.ctrl, dtype=np.float64).copy()
+        current_action[self._gripper_id(self.runtime.arm)] = (
+            self.runtime.gripper.close_value
+        )
+        site_name = self.runtime.pipette.pipette_tip_site
+        silent_recorder = _DiscardingRecorder()
+        record_steps = max(1, int(self.runtime.timing.steps_per_segment) // 4)
+        for item in plan:
+            phase = f"tip_mount:{item.name}"
+            target_pos = item.debug_target_pos
+            if target_pos is None:
+                target_pos = item.resolved.pos
+            current_action = self.executor.visual_servo_site_to_target(
+                silent_recorder,
+                current_action,
+                phase,
+                site_name,
+                target_pos,
+                item.debug_target_quat,
+                arm_name=str(item.target.arm),
+                context=context,
+            )
+            current_action[self._gripper_id(str(item.target.arm))] = (
+                self.runtime.gripper.close_value
+            )
+            item.action = current_action.copy()
+            self.executor.hold_action(
+                recorder,
+                current_action,
+                record_steps,
+                phase,
+                context,
+            )
+            self.executor.record_site_target_error(phase, site_name, target_pos)
+
+    def _validate_tip_hover_alignment(self) -> dict[str, Any]:
+        alignment = self._tip_axis_alignment()
+        hover_height = float(self.runtime.tips.tip_hover_height)
+        height_error = abs(float(alignment["piptip_minus_mount"][2]) - hover_height)
+        alignment["expected_hover_height"] = hover_height
+        alignment["height_error"] = height_error
+        self.target_builder.tip_target_info[
+            "tip_hover_alignment"
+        ] = alignment
+        if (
+            float(alignment["piptip_xy_error"]) > self.runtime.tips.tip_attach_xy_tolerance
+            or float(alignment["pipette_mount_xy_error"]) > self.runtime.tips.tip_attach_xy_tolerance
+            or float(alignment["axis_xy_drift"]) > self.runtime.tips.tip_axis_xy_tolerance
+        ):
+            raise RuntimeError(
+                "ADP tip is not centered above the selected tip: "
+                f"piptip_xy={float(alignment['piptip_xy_error']) * 1000.0:.2f}mm, "
+                f"mount_xy={float(alignment['pipette_mount_xy_error']) * 1000.0:.2f}mm, "
+                f"axis_drift={float(alignment['axis_xy_drift']) * 1000.0:.2f}mm"
+            )
+        return alignment
+
+    def _validate_tip_mount_alignment(self) -> dict[str, Any]:
+        alignment = self._tip_axis_alignment()
+        actual_depth = float(-alignment["piptip_minus_mount"][2])
+        expected_depth = max(
+            0.0,
+            -float(self.runtime.tips.tip_mount_offset[2]),
+        )
+        depth_error = abs(actual_depth - expected_depth)
+        alignment.update(
+            {
+                "actual_insert_depth": actual_depth,
+                "expected_insert_depth": expected_depth,
+                "depth_error": depth_error,
+            }
+        )
+        self.target_builder.tip_target_info[
+            "tip_mount_alignment_before_attachment"
+        ] = alignment
+        if (
+            float(alignment["piptip_xy_error"]) > self.runtime.tips.tip_attach_xy_tolerance
+            or float(alignment["pipette_mount_xy_error"]) > self.runtime.tips.tip_attach_xy_tolerance
+            or float(alignment["axis_xy_drift"]) > self.runtime.tips.tip_axis_xy_tolerance
+            or depth_error > self.runtime.tips.tip_attach_depth_tolerance
+            or actual_depth <= 0.0
+        ):
+            raise RuntimeError(
+                "Refusing to attach tip before the ADP end is centered and inserted: "
+                f"piptip_xy={float(alignment['piptip_xy_error']) * 1000.0:.2f}mm, "
+                f"mount_xy={float(alignment['pipette_mount_xy_error']) * 1000.0:.2f}mm, "
+                f"axis_drift={float(alignment['axis_xy_drift']) * 1000.0:.2f}mm, "
+                f"depth_error={depth_error * 1000.0:.2f}mm, "
+                f"actual_depth={actual_depth * 1000.0:.2f}mm"
+            )
+        return alignment
+
+    def _tip_axis_alignment(self) -> dict[str, Any]:
+        if self.target_builder.tip_target_info is None:
+            raise RuntimeError("Tip target not selected before attachment")
+        mount_site = self.target_builder.tip_target_info.get("tip_mount_site")
+        if not mount_site:
+            raise RuntimeError("Selected tip has no mount site for attachment check")
+
+        mount_pos, mount_quat = site_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            str(mount_site),
+        )
+        piptip_pos, _ = site_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            self.runtime.pipette.pipette_tip_site,
+        )
+        pipette_mount_pos, _ = site_pose(
+            self.env.model,
+            self.env.data,
+            self.env.mujoco,
+            self.runtime.pipette.pipette_mount_site,
+        )
+        mount_mat = quat_to_mat(mount_quat)
+        delta_world = np.asarray(piptip_pos, dtype=np.float64) - np.asarray(
+            mount_pos,
+            dtype=np.float64,
+        )
+        pipette_mount_delta_world = np.asarray(
+            pipette_mount_pos,
+            dtype=np.float64,
+        ) - np.asarray(mount_pos, dtype=np.float64)
+        nozzle_axis_world = np.asarray(piptip_pos, dtype=np.float64) - np.asarray(
+            pipette_mount_pos,
+            dtype=np.float64,
+        )
+        delta = mount_mat.T @ delta_world
+        pipette_mount_delta = mount_mat.T @ pipette_mount_delta_world
+        nozzle_axis = mount_mat.T @ nozzle_axis_world
+        return {
+            "pipette_tip_site": self.runtime.pipette.pipette_tip_site,
+            "pipette_mount_site": self.runtime.pipette.pipette_mount_site,
+            "tip_mount_site": str(mount_site),
+            "piptip_pos": piptip_pos.tolist(),
+            "pipette_mount_pos": pipette_mount_pos.tolist(),
+            "tip_mount_pos": mount_pos.tolist(),
+            "tip_mount_quat": mount_quat.tolist(),
+            "piptip_minus_mount": delta.tolist(),
+            "piptip_minus_mount_world": delta_world.tolist(),
+            "pipette_mount_minus_tip_mount": pipette_mount_delta.tolist(),
+            "pipette_mount_minus_tip_mount_world": (
+                pipette_mount_delta_world.tolist()
+            ),
+            "nozzle_axis": nozzle_axis.tolist(),
+            "nozzle_axis_world": nozzle_axis_world.tolist(),
+            "piptip_xy_error": float(np.linalg.norm(delta[:2])),
+            "pipette_mount_xy_error": float(np.linalg.norm(pipette_mount_delta[:2])),
+            "axis_xy_drift": float(np.linalg.norm(nozzle_axis[:2])),
+            "xy_tolerance": self.runtime.tips.tip_attach_xy_tolerance,
+            "depth_tolerance": self.runtime.tips.tip_attach_depth_tolerance,
+            "axis_xy_tolerance": self.runtime.tips.tip_axis_xy_tolerance,
+        }
+
     def _plan_targets(
         self,
         targets: tuple[TaskTarget, ...] | list[TaskTarget],
@@ -620,43 +799,6 @@ class AdpTipToTubeTask(AutoLabTask):
             context,
             default_gripper_value=default_gripper_value,
         )
-
-    def _execute_kinematic_mount_plan(
-        self,
-        recorder: EpisodeRecorder,
-        plan: list[PlannedTaskTarget],
-        phase_prefix: str,
-        context: ExecutionContext,
-    ) -> None:
-        """Record the short tip-mount insertion using exact planned IK states."""
-
-        for item in plan:
-            phase = f"{phase_prefix}:{item.name}"
-            qpos_start = self.env.data.qpos.copy()
-            qpos_target = qpos_start.copy()
-            qpos_ids = joint_qpos_ids(
-                self.env.model,
-                self.env.mujoco,
-                item.arm_joint_names,
-            )
-            qpos_target[qpos_ids] = np.asarray(item.arm_qpos, dtype=np.float64)
-            action = np.asarray(item.action, dtype=np.float64).copy()
-            action[self._gripper_id(str(item.target.arm))] = self.runtime.gripper.close_value
-            steps = max(1, min(4, self.runtime.timing.steps_per_segment))
-            for step in range(1, steps + 1):
-                alpha = step / steps
-                alpha = alpha * alpha * (3.0 - 2.0 * alpha)
-                self.env.data.qpos[:] = (1.0 - alpha) * qpos_start + alpha * qpos_target
-                self.env.data.qvel[:] = 0.0
-                self.env.data.ctrl[:] = action
-                obs = self.executor.apply_constraints(context) or self.env.get_observation()
-                recorder.record(obs, action, phase)
-            if item.debug_target_pos is not None:
-                self.executor.record_site_target_error(
-                    phase,
-                    self.runtime.pipette.pipette_tip_site,
-                    item.debug_target_pos,
-                )
 
     def _record_kinematic_hold(
         self,

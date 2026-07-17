@@ -31,8 +31,8 @@ def _has_seed_override(args: list[str]) -> bool:
 
 if __name__ == "__main__":
     # Default arguments for the ADP tip-to-tube batch generation.
-    # Episode image recording is intentionally off by default; use
-    # export_episode_images.py after generation, or pass --with-images here.
+    # Image recording is enabled by default so the produced NPZ files can be
+    # consumed directly by convert_autolabsim_to_lerobot_act.py.
     defaults = [
         "--model",
         "model/scenes/scene_mujoco_fast_tubes_adp_pipette_grasped.xml",
@@ -44,6 +44,7 @@ if __name__ == "__main__":
         "data/episodes/adp_pipette_tip_to_tube_batch",
         "--cameras",
         "overview_camera,wrist_cam,wrist_cam1",
+        "--with-images",
         "--initial-static-steps",
         "20",
         "--settle-steps",
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         "--visual-servo-max-iters",
         "14",
         "--visual-servo-steps",
-        "6",
+        "1",
         "--visual-servo-pos-tol",
         "0.00015",
         "--visual-servo-rot-tol",
@@ -90,7 +91,9 @@ if __name__ == "__main__":
         "--tip-retract-height",
         "0.100",
         "--tip-mount-offset",
-        "0 0 -0.012",
+        "0 0 -0.008",
+        "--tip-mount-axis-step",
+        "0.002",
     ]
     user_args = sys.argv[1:]
     if not _has_seed_override(user_args):

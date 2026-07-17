@@ -305,6 +305,7 @@ def _create_adp_tip_to_tube_task(request: TaskRequest) -> AdpTipToTubeTask:
     )
     pipette = AdpPipetteModelConfig(
         pipette_tip_site=_param(params, "pipette_tip_site", AdpPipetteModelConfig),
+        pipette_mount_site=_param(params, "pipette_mount_site", AdpPipetteModelConfig),
         pipette_joint=_param(params, "pipette_joint", AdpPipetteModelConfig),
         pipette_body=_param(params, "pipette_body", AdpPipetteModelConfig),
     )
@@ -318,6 +319,10 @@ def _create_adp_tip_to_tube_task(request: TaskRequest) -> AdpTipToTubeTask:
         tip_retract_height=_param(params, "tip_retract_height", AdpTipTargetConfig),
         tip_length=_param(params, "tip_length", AdpTipTargetConfig),
         tip_mount_offset=_vec_param(params, "tip_mount_offset", AdpTipTargetConfig),
+        tip_mount_axis_step=_param(params, "tip_mount_axis_step", AdpTipTargetConfig),
+        tip_attach_xy_tolerance=_param(params, "tip_attach_xy_tolerance", AdpTipTargetConfig),
+        tip_attach_depth_tolerance=_param(params, "tip_attach_depth_tolerance", AdpTipTargetConfig),
+        tip_axis_xy_tolerance=_param(params, "tip_axis_xy_tolerance", AdpTipTargetConfig),
     )
     tube = AdpTubeTargetConfig(
         tube_joint=_param(params, "tube_joint", AdpTubeTargetConfig),

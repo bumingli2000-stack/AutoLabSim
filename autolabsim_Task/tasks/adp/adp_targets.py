@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from ...math3d import normalize_quat
+from ...math3d import normalize_quat, quat_to_mat
 from ...planner import TaskTargetPlanner
 from ...scene import free_joint_pose, site_pose
 from ...task_target import FrameRef, GripperCommand, TaskTarget
@@ -18,6 +18,7 @@ from .adp_scene import AdpSceneQuery
 @dataclass(frozen=True)
 class AdpPipetteModelConfig:
     pipette_tip_site: str = "piptip_site"
+    pipette_mount_site: str = "adp_tip_mount_site"
     pipette_joint: str = "pipette_joint"
     pipette_body: str = "pipette_free"
 
@@ -32,10 +33,14 @@ class AdpTipTargetConfig:
     tip_hover_height: float = 0.020
     tip_retract_height: float = 0.100
     tip_length: float = 0.035
-    # World-space offset from the selected tip mount site to the ADP piptip_site
-    # at full insertion. The current ADP mesh has only a short protrusion, so
-    # the visible protrusion tip is inserted about 8 mm below the tip opening.
-    tip_mount_offset: tuple[float, float, float] = (0.0, 0.0, -0.012)
+    # Offset from the selected tip mount site to the ADP piptip_site in the
+    # tip mount-site frame. The tip mount_site is about 4 mm above the visible
+    # opening, so -8 mm places the ADP protrusion about 4 mm into the tip.
+    tip_mount_offset: tuple[float, float, float] = (0.0, 0.0, -0.008)
+    tip_mount_axis_step: float = 0.002
+    tip_attach_xy_tolerance: float = 0.0015
+    tip_attach_depth_tolerance: float = 0.0015
+    tip_axis_xy_tolerance: float = 0.0015
 
 
 @dataclass(frozen=True)
@@ -152,17 +157,30 @@ class AdpTargetBuilder:
         mount_quat = normalize_quat(
             np.asarray(target_tip["mount_quat"], dtype=np.float64)
         )
-        mount_target_pos = mount_pos + np.asarray(
+        mount_mat = quat_to_mat(mount_quat)
+        mount_offset = np.asarray(
             self.tips.tip_mount_offset,
             dtype=np.float64,
         )
-        target_hover_pos = mount_pos + np.asarray(
+        hover_offset = np.asarray(
             [0.0, 0.0, self.tips.tip_hover_height],
             dtype=np.float64,
         )
-        target_parent = FrameRef("world")
-        hover_relative_pos = tuple(target_hover_pos.tolist())
-        fixed_target_quat = self.fixed_quat
+        mount_target_pos = mount_pos + mount_mat @ mount_offset
+        target_hover_pos = mount_pos + mount_mat @ hover_offset
+        if mount_site:
+            target_parent = FrameRef("site", str(mount_site))
+            hover_relative_pos = tuple(hover_offset.tolist())
+            mount_relative_pos = tuple(mount_offset.tolist())
+            fixed_target_quat = self.planner.relative_quat_for_world_quat(
+                target_parent,
+                self.fixed_quat,
+            )
+        else:
+            target_parent = FrameRef("world")
+            hover_relative_pos = tuple(target_hover_pos.tolist())
+            mount_relative_pos = tuple(mount_target_pos.tolist())
+            fixed_target_quat = self.fixed_quat
 
         self.tip_target_info = {
             "tip_joint": tip_joint,
@@ -181,8 +199,15 @@ class AdpTargetBuilder:
                 "kind": target_parent.kind,
                 "name": target_parent.name,
             },
+            "tip_mount_target_relative_pos": list(mount_relative_pos),
             "tip_mount_target_relative_quat": fixed_target_quat.tolist(),
             "target_tip_hover_pos": target_hover_pos.tolist(),
+            "target_tip_hover_parent": {
+                "kind": target_parent.kind,
+                "name": target_parent.name,
+            },
+            "target_tip_hover_relative_pos": list(hover_relative_pos),
+            "target_tip_hover_relative_quat": fixed_target_quat.tolist(),
             "tip_xy_distance": target_tip["xy_distance"],
         }
 
@@ -202,49 +227,64 @@ class AdpTargetBuilder:
         self._ensure_fixed_quat()
         if self.tip_target_info is None:
             raise RuntimeError("Tip target not selected; call tip_hover_targets first")
-        mount_pos = np.asarray(self.tip_target_info["tip_mount_pos"], dtype=np.float64)
+        parent_info = self.tip_target_info.get(
+            "tip_mount_target_parent",
+            {"kind": "world", "name": None},
+        )
+        target_parent = FrameRef(
+            str(parent_info.get("kind", "world")),
+            parent_info.get("name"),
+        )
         final_pos = np.asarray(
-            self.tip_target_info["tip_mount_target_pos"],
+            self.tip_target_info.get(
+                "tip_mount_target_relative_pos",
+                self.tip_target_info["tip_mount_target_pos"],
+            ),
             dtype=np.float64,
         )
-        target_quat = np.asarray(self.fixed_quat, dtype=np.float64)
+        target_quat = np.asarray(
+            self.tip_target_info.get(
+                "tip_mount_target_relative_quat",
+                self.fixed_quat,
+            ),
+            dtype=np.float64,
+        )
 
-        # Keep the ADP nozzle on the tip axis while descending. A single long
-        # joint-space interpolation can arc sideways; short coaxial waypoints
-        # keep the visible path close to vertical while the selected tip is
-        # still fixed in the box.
-        final_rel_z = float(final_pos[2] - mount_pos[2])
-        z_offsets: list[float] = []
-        z_step = 0.004
-        z_offset = float(self.tips.tip_hover_height) - z_step
-        while z_offset > final_rel_z + z_step * 0.5:
-            z_offsets.append(z_offset)
-            z_offset -= z_step
-        z_offsets.append(final_rel_z)
+        hover_pos = np.asarray(
+            self.tip_target_info.get(
+                "target_tip_hover_relative_pos",
+                [final_pos[0], final_pos[1], self.tips.tip_hover_height],
+            ),
+            dtype=np.float64,
+        )
+        z_start = float(hover_pos[2])
+        z_final = float(final_pos[2])
+        step = max(0.001, float(self.tips.tip_mount_axis_step))
+        z_values: list[float] = []
+        z = z_start - step
+        while z > z_final + step * 0.5:
+            z_values.append(z)
+            z -= step
+        z_values.append(z_final)
 
         targets: list[TaskTarget] = []
-        seen_z: list[float] = []
-        for index, z_offset in enumerate(z_offsets):
-            if any(abs(z_offset - previous) < 1e-6 for previous in seen_z):
-                continue
-            seen_z.append(z_offset)
-            target_pos = final_pos.copy()
-            target_pos[2] = mount_pos[2] + z_offset
-            is_final = index == len(z_offsets) - 1
-            name = (
-                "adp_tip_mount_down"
-                if is_final
-                else f"adp_tip_mount_axis_{index + 1:02d}"
-            )
+        for index, z_value in enumerate(z_values):
+            pos = final_pos.copy()
+            pos[2] = z_value
+            is_final = index == len(z_values) - 1
             targets.append(
                 TaskTarget(
-                    name=name,
-                    parent=FrameRef("world"),
-                    pos=tuple(target_pos.tolist()),
+                    name=(
+                        "adp_tip_mount_down"
+                        if is_final
+                        else f"adp_tip_mount_axis_{index + 1:02d}"
+                    ),
+                    parent=target_parent,
+                    pos=tuple(pos.tolist()),
                     quat_wxyz=tuple(target_quat.tolist()),
                     arm=arm_name,
                     controlled_site=self.pipette.pipette_tip_site,
-                    servo_mode="pose" if is_final else "position",
+                    servo_mode="pose",
                     gripper=self._closed_during(),
                 )
             )
